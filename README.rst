@@ -18,7 +18,7 @@ SERVER
 ------
 blip_receiver.py - a class that understands the Blip-protocol from the Blinkenlights-project_
 pygame_ledpanel.py - listens for incoming Blip-packets through BlipReceiver and visualizes
-    them with the help of PyGame-library_
+them with the help of PyGame-library_
 
 .. _Blinkenlights-project: http://blinkenlights.net/
 .. _PyGame-library: http://www.pygame.org/
