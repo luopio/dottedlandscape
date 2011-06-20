@@ -10,6 +10,8 @@ a web frontend).
 The software aims to invite people from different backgrounds to play with
 the technology and come up with appropriate uses on their own.
 
+Will work on Linux, probably on Mac, not likely on Windows.
+
 .. _Python: http://www.python.org
 .. _Arduino: http://www.arduino.cc
 
@@ -23,10 +25,13 @@ them with the help of PyGame-library_
 .. _Blinkenlights-project: http://blinkenlights.net/
 .. _PyGame-library: http://www.pygame.org/
 
+Quick instructions:
+1. Download the Blip-library from the Blinkenlights project to build a Blip-sender host or use your own.
+2. Go to the server directory and run python pygame_ledpanel.py. It will start listening on all
+available interfaces
+3. Run your Blip-sender (e.g. with the Blip-library: tests/test-movie-player movies/camel-18x8.blm 127.0.0.1)
+4. Watch in awe as the camel moves on your screen
 
-CLIENT
-------
-...
 
 ARDUINO
 -------
