@@ -1,43 +1,48 @@
-import pygame, time
+import pygame, time, sys
 
 import blip_receiver
 
 led_panel_initialized = False
 clock, screen = None, None
 leds_x, leds_y = 0, 0
-width, height = 0, 0
+circle_radius = 6
+circle_spacing = 10
+window_margins = (30, 30)
 
 def on_receive(header_data, data):
-    global led_panel_initialized
-    if not led_panel_initialized:
-        h, w = header_data[1], header_data[2]
-        print "Received width, height", w, h
-        global width, height, screen, clock, leds_x, leds_y
+    global led_panel_initialized, leds_x, leds_y
+    h, w = header_data[1], header_data[2]
+    if not led_panel_initialized or leds_x != w or leds_y != h:
+        print "Panel: received new width, height", w, h
+        global screen, clock
         width, height = w, h
         
         pygame.init()
-        # Set the height and width of the screen
-        # width, height = 200, 200
+        # get the panel size and set the window width accordingly
         leds_x, leds_y = w, h
-        width, height = w * 40, h * 40
-        screen = pygame.display.set_mode((400, 400))
+        width, height = w * circle_radius + w * circle_spacing + 2 * window_margins[0], \
+                        h * circle_radius + h * circle_spacing + 2 * window_margins[1]
+        screen = pygame.display.set_mode((width, height))
          
-        pygame.display.set_caption("LED Panel Sim")
+        pygame.display.set_caption("LED Panel Sim %sx%s" % (w, h) )
         clock = pygame.time.Clock()
         led_panel_initialized = True
     
-    # print "got data", data
     evt = pygame.event.Event(pygame.USEREVENT, {'data': data})
     pygame.event.post(evt)
     
 
-print "Waiting for connections to determine panel size" 
+print "Panel: waiting for connections to determine panel size" 
 b = blip_receiver.BlipReceiver()
 b.add_observer(on_receive)
 b.start()
 
-while not led_panel_initialized:
-    time.sleep(0.5)
+try:
+    while not led_panel_initialized:
+        time.sleep(0.5)
+except KeyboardInterrupt:     
+    b.stop()
+    sys.exit(1)
 
 done = False 
 while done == False:
@@ -46,25 +51,21 @@ while done == False:
      
     for event in pygame.event.get():
         if event.type == pygame.QUIT: # user clicked close
-            print "Quit called. Have a good day!"
+            print "Panel: quit called. Have a good day!"
             done = True
             
         elif event.type  == pygame.USEREVENT:
             # print "received user event"
             screen.fill((0, 0, 0))
-            margins = (30, 30)
-            r = 6
             for i in xrange(0, leds_x * leds_y):
-                x = (i % leds_x) * 20 + margins[0]
-                y = (i / leds_x) * 20 + margins[1]
+                x = (i % leds_x) * (circle_radius + circle_spacing) + window_margins[0]
+                y = (i / leds_x) * (circle_radius + circle_spacing) + window_margins[1]
                 val = event.data[i]
                 
-                pygame.draw.circle(screen, (val, 100, 10), [x, y], r, 0)
+                pygame.draw.circle(screen, (val, 100, 10), [x, y], circle_radius, 0)
         
             pygame.display.flip()
 
-print "stopping receiver"
 # Be IDLE friendly
-b.keep_on_truckin = False
-b.join()
+b.stop()
 pygame.quit ()

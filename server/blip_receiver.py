@@ -6,7 +6,15 @@ s = None
 
 
 class BlipReceiver(threading.Thread):
-    ''' Receives messages from a Blip-protocol using source via UDP '''
+    ''' Receives, unpacks and delivers messages from a Blip-protocol using host via UDP.
+    
+        To receive the data in a listener, call add_observer(f).
+        Function 'f' will then be called with two parameters:
+        header_data -    tuple: (magic_number, anim_width, anim_height, amount_of_channels, max_value)
+        video_data  -    tuple of values with length anim_width * anim_height * amount_of_channels
+        every time a packet arrives. Blip receiver will run in it's own thread until you call stop(), 
+        or it receives a quit command via the network. 
+    '''
     
     def __init__(self, *args, **kwargs):
         self.host = None # Symbolic name meaning all available interfaces
@@ -18,19 +26,22 @@ class BlipReceiver(threading.Thread):
         super(BlipReceiver, self).__init__(*args, **kwargs)
     
     
+    def stop(self):
+        self.keep_on_truckin = False
+        self.join()
+    
     def add_observer(self, obs):
-        print "adding observer %s" % len(self._observers)
+        print "BlipReceiver: adding observer %s" % len(self._observers)
         self._observers.append(obs)
         
             
     def listen_all(self):
         for res in socket.getaddrinfo(self.host, self.port, socket.AF_UNSPEC,
                                       socket.SOCK_DGRAM, 0, socket.AI_PASSIVE):
-            print "listening to", res
+            print "BlipReceiver: listening to", res
             af, socktype, proto, canonname, sa = res
             try:
                 self.s = socket.socket(af, socktype, proto)
-                print af, socktype, proto
             except socket.error, msg:
                 self.s = None
                 continue
@@ -50,7 +61,7 @@ class BlipReceiver(threading.Thread):
     def run(self):
         self.listen_all()
         self.s.settimeout(1.0)
-        print "ready to receive data"
+        print "BlipReceiver: ready to receive data"
         while self.keep_on_truckin:
             try:
                 data = self.s.recv(0xfff) # 4095 bytes
@@ -64,9 +75,11 @@ class BlipReceiver(threading.Thread):
                     
             except socket.timeout:
                 if self.data_struct: # we already received data, so this is the end
-                    break
+                    # get ready for the next flick
+                    self.data_struct = None
+                pass 
         
-        print "receiver done. closing connection"
+        print "BlipReceiver: I'm done. closing connection"
         self.s.close()
 
 
