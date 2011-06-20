@@ -28,8 +28,11 @@ them with the help of PyGame-library_
 Quick instructions:
 
 #. Download the Blip-library from the Blinkenlights project to build a Blip-sender host or use your own.
+
 #. Go to the server directory and run python pygame_ledpanel.py. It will start listening on all available interfaces
+
 #. Run your Blip-sender (e.g. with the Blip-library: tests/test-movie-player movies/camel-18x8.blm 127.0.0.1)
+
 #. Watch in awe as the camel moves on your screen
 
 
