@@ -23,6 +23,7 @@ class BlipReceiver(threading.Thread):
         self.data_struct = None # constructed on first contact, when we know size
         self._observers = []
         self.keep_on_truckin = True
+        self._receive_amount = 0xfff # 4095 bytes default
         super(BlipReceiver, self).__init__(*args, **kwargs)
     
     
@@ -64,11 +65,15 @@ class BlipReceiver(threading.Thread):
         print "BlipReceiver: ready to receive data"
         while self.keep_on_truckin:
             try:
-                data = self.s.recv(0xfff) # 4095 bytes
+                data = self.s.recv(self._receive_amount) 
                 if not data: break
                 header_data = self.header_struct.unpack(data[:12])
                 if not self.data_struct:
+                    print "BlipReceiver: new data with w, h, c", header_data[1], header_data[2], header_data[3]
                     self.data_struct = struct.Struct('B' * header_data[1] * header_data[2] * header_data[3])
+                    if (self.data_struct.size + self.header_struct.size) > self._receive_amount:
+                        data += self.s.recv((self.data_struct.size + self.header_struct.size) - self._receive_amount)
+                        self._receive_amount = self.data_struct.size + self.header_struct.size
                 payload_data = self.data_struct.unpack(data[12:])
                 for o in self._observers:
                     o(header_data, payload_data)
