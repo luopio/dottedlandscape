@@ -4,6 +4,112 @@ import threading
 # magic, w, h, channels, max_val
 s = None
 
+class DottedLandscapeCommunicator(object):
+    ''' Understands the dl protocol, which is an extension to the Blinkenlights project's
+        blip-protocol (i.e. this class can be used to talk with blip-protocol hosts as well '''
+    
+    blip_MAGIC_MCU_FRAME = 0x23542666
+    dl_MAGIC_NEW_CONNECTION = 0x11AEEE
+    dl_MAGIC_FRAME_PARTIAL = 0x114545 # partial frame with just changed dots
+    dl_MAGIC_FRAME_FULL = 0x119898 # full frame received
+    
+    def __init__(self):
+        self.header_struct = struct.Struct('!IHHHH') 
+        self.partial_frame_data_struct = struct.Struct('!IIIHHH') # x, y, r, g, b 
+        self.new_conn_data_struct = struct.Struct('!HHHHI') # ip.ip.ip.ip, port
+        self.blip_data_struct = None # constructed on first contact, when we know size
+    
+    
+    def define_panel(self, width, height, channels):
+        ''' called by the server to create the data struct '''
+        self.data_struct = struct.Struct('B' * width * height * channels)
+    
+    
+    def decode(self, data):
+        try:
+            header_data = self.header_struct.unpack(data[:12])
+        except struct.error:
+            print "dl_server: faulty header in decode len=%s" % len(data)
+            return None, None
+        
+        # this is a blip package or dl full frame (identical for now)
+        if header_data[0] == self.blip_MAGIC_MCU_FRAME or header_data[0] == self.dl_MAGIC_FRAME_FULL:
+            if not self.blip_data_struct:
+                self.blip_data_struct = struct.Struct('B' * header_data[1] * header_data[2] * header_data[3])
+                self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..
+            payload_data = self.blip_data_struct.unpack(data[12:])
+        
+        elif header_data[0] == self.dl_MAGIC_FRAME_PARTIAL:
+            if not self.panel_width:
+                self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..                
+            payload_data = self.partial_frame_data_struct.unpack(data[12:])
+        
+        elif header_data[0] == self.dl_MAGIC_NEW_CONNECTION:
+            d = self.new_conn_data_struct.unpack(data[12:])
+            payload_data = ('%s.%s.%s.%s' % d[:4], d[4]) 
+            
+        return header_data, payload_data
+    
+    
+    def encode(self, header_data, payload_data):
+        data = self.header_struct.pack(*header_data)
+        data += self.data_struct.pack(*payload_data)
+        return data
+    
+    
+    def encode_add_receiver(self, ip, port):
+        ip0, ip1, ip2, ip3 = [int(i) for i in ip.split('.')]
+        data = self.header_struct.pack(self.dl_MAGIC_NEW_CONNECTION, 0, 0, 0, 0) + \
+               self.new_conn_data_struct.pack(ip0, ip1, ip2, ip3, port)
+        return data
+    
+    
+    def encode_full_frame(self, data):
+        # always 3 channels, max value 255
+        return self.encode((self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, 3, 255),
+                           data)
+    
+    
+    def encode_partial_frame(self, x, y, r, g, b):
+        return self.encode((self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, 3, 255),
+                           (x, y, r, g, b))
+
+    
+    def send(self, packet):
+        ''' send change notification to the server '''
+        self.send_socket.send(packet)
+        
+    
+    def on_socket_receive(self, fd, events):
+        try:
+            data = self.receive_socket.recv(4096)
+            headers, payload = self.decode(data)
+            if not headers:
+                return None
+            
+            if headers[0] in (self.blip_MAGIC_MCU_FRAME, self.dl_MAGIC_FRAME_FULL, self.dl_MAGIC_FRAME_PARTIAL):
+                print "DLCOMM >> valid frame found"
+                return payload
+        except socket.error:
+            print "DLCOMM >> nothing to receive?"
+        
+
+    def connect(self, host, port):
+        print "DLCOMM >> connect to", host, ":", port
+        self.host = host
+        self.port = port
+        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.send_socket.bind((self.host, self.port))
+        self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.receive_socket.bind((self.host, self.port + 1))
+        self.receive_socket.setblocking(0) # non-blocking
+        
+    
+    def disconnect(self):
+        self.send_socket.close()
+        self.receive_socket.close()
+
+
 
 class BlipReceiver(threading.Thread):
     ''' Receives, unpacks and delivers messages from a Blip-protocol using host via UDP.
@@ -30,6 +136,7 @@ class BlipReceiver(threading.Thread):
     def stop(self):
         self.keep_on_truckin = False
         self.join()
+    
     
     def add_observer(self, obs):
         print "BlipReceiver: adding observer %s" % len(self._observers)

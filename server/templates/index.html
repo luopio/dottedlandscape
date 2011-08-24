@@ -2,6 +2,19 @@
 
 {% block content %}
 
-index here ! bujakasha!
+<div id="updated"></div>
+<table id="panel">
+    <thead></thead>
+    <tfoot></tfoot>
+    <tbody>
+        {% for y in range(0, 8) %}
+        <tr>
+            {% for x in range(0, 8) %}
+            <td x="{{x}}" y="{{y}}">{{x}},{{y}}</td>
+            {% end %}
+        </tr>
+        {% end %}
+    </tbody>
+</table>
 
 {% end %}
