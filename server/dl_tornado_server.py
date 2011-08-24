@@ -16,31 +16,22 @@ class MainHandler(tornado.web.RequestHandler):
     
 
 
-# no need for a cursor, since we're always just sending the current state. 
-# what we need tho' is a way to not send the same data again (notifies filtered in dl_server?)
-# options: create client ids based on joining time stamp + random string? <- fingerprint
-#    and use that as id here?
-#  option 2: make clients send their latest data set back (or some kind of hash/timestamp of
-#   it (kind of cursor, but just to avoid redundancy))
 class PanelPressedHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
         x = int(args['x'][0])
         y = int(args['y'][0])
-        print "pressed at", x, y, 
-        print "color", args['c[]'][0]
+        c = args['c[]']
+        #print "pressed at", x, y, 
+        #print "color", args['c[]'][0]
+        print "panel_pressed", x, y, c
+        packet = DL_COMMUNICATOR.encode_partial_frame(x, y, c)
+        DL_COMMUNICATOR.send(packet)
         self.set_header("Content-Type", "application/json")
         self.write('ok')
+
         
      
-
-# some update func()
-        #global WAITERS
-        #for w in WEB_CLIENTS:
-        #    w()
-        #WEB_CLIENTS = []
-
-    
 class PanelUpdateHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
@@ -54,6 +45,7 @@ class PanelUpdateHandler(tornado.web.RequestHandler):
         print "<<<< finishing async request"
         self.finish(tornado.escape.json_encode(data))
     
+
 
 def notify_clients_on_panel_change(fd, events):
     data = DL_COMMUNICATOR.on_socket_receive(fd, events)

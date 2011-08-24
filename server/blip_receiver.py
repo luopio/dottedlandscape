@@ -15,14 +15,14 @@ class DottedLandscapeCommunicator(object):
     
     def __init__(self):
         self.header_struct = struct.Struct('!IHHHH') 
-        self.partial_frame_data_struct = struct.Struct('!IIIHHH') # x, y, r, g, b 
+        self.partial_frame_data_struct = struct.Struct('!IIHHH') # x, y, r, g, b 
         self.new_conn_data_struct = struct.Struct('!HHHHI') # ip.ip.ip.ip, port
-        self.blip_data_struct = None # constructed on first contact, when we know size
+        self.full_frame_data_struct = None # constructed on first contact, when we know size
     
     
     def define_panel(self, width, height, channels):
         ''' called by the server to create the data struct '''
-        self.data_struct = struct.Struct('B' * width * height * channels)
+        self.full_frame_data_struct = struct.Struct('B' * width * height * channels)
     
     
     def decode(self, data):
@@ -34,10 +34,10 @@ class DottedLandscapeCommunicator(object):
         
         # this is a blip package or dl full frame (identical for now)
         if header_data[0] == self.blip_MAGIC_MCU_FRAME or header_data[0] == self.dl_MAGIC_FRAME_FULL:
-            if not self.blip_data_struct:
-                self.blip_data_struct = struct.Struct('B' * header_data[1] * header_data[2] * header_data[3])
+            if not self.full_frame_data_struct:
+                self.full_frame_data_struct = struct.Struct('B' * header_data[1] * header_data[2] * header_data[3])
                 self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..
-            payload_data = self.blip_data_struct.unpack(data[12:])
+            payload_data = self.full_frame_data_struct.unpack(data[12:])
         
         elif header_data[0] == self.dl_MAGIC_FRAME_PARTIAL:
             if not self.panel_width:
@@ -53,11 +53,11 @@ class DottedLandscapeCommunicator(object):
     
     def encode(self, header_data, payload_data):
         data = self.header_struct.pack(*header_data)
-        data += self.data_struct.pack(*payload_data)
+        data += self.full_frame_data_struct.pack(*payload_data)
         return data
     
     
-    def encode_add_receiver(self, ip, port):
+    def encode_handshake(self, ip, port):
         ip0, ip1, ip2, ip3 = [int(i) for i in ip.split('.')]
         data = self.header_struct.pack(self.dl_MAGIC_NEW_CONNECTION, 0, 0, 0, 0) + \
                self.new_conn_data_struct.pack(ip0, ip1, ip2, ip3, port)
@@ -70,14 +70,15 @@ class DottedLandscapeCommunicator(object):
                            data)
     
     
-    def encode_partial_frame(self, x, y, r, g, b):
-        return self.encode((self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, 3, 255),
-                           (x, y, r, g, b))
+    def encode_partial_frame(self, x, y, color):
+        print "partial frame encode with", x, y, color[0], color[1], color[2]
+        return self.header_struct.pack(self.dl_MAGIC_FRAME_PARTIAL, self.panel_height, self.panel_width, 3, 255) +\
+               self.partial_frame_data_struct.pack(int(x), int(y), int(color[0]), int(color[1]), int(color[2])) 
 
     
     def send(self, packet):
         ''' send change notification to the server '''
-        self.send_socket.send(packet)
+        self.send_socket.sendto(packet, 0, (self.host, self.port))
         
     
     def on_socket_receive(self, fd, events):
@@ -99,9 +100,12 @@ class DottedLandscapeCommunicator(object):
         self.host = host
         self.port = port
         self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.send_socket.bind((self.host, self.port))
+        receive_port = port + 1
+        # handshake!
+        packet = self.encode_handshake(host, receive_port)
+        self.send_socket.sendto(packet, 0, (host, port))
         self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.receive_socket.bind((self.host, self.port + 1))
+        self.receive_socket.bind(("0.0.0.0", receive_port))
         self.receive_socket.setblocking(0) # non-blocking
         
     
