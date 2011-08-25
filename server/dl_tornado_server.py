@@ -48,7 +48,7 @@ class PanelUpdateHandler(tornado.web.RequestHandler):
 
 
 def notify_clients_on_panel_change(fd, events):
-    data = DL_COMMUNICATOR.on_socket_receive(fd, events)
+    data = DL_COMMUNICATOR.check_for_data()
     if data:
         global WEB_CLIENTS
         for w in WEB_CLIENTS:

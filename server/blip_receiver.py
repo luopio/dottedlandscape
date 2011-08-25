@@ -35,13 +35,16 @@ class DottedLandscapeCommunicator(object):
         # this is a blip package or dl full frame (identical for now)
         if header_data[0] == self.blip_MAGIC_MCU_FRAME or header_data[0] == self.dl_MAGIC_FRAME_FULL:
             if not self.full_frame_data_struct:
-                self.full_frame_data_struct = struct.Struct('B' * header_data[1] * header_data[2] * header_data[3])
                 self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..
+                self.channels = header_data[3]
+                self.full_frame_data_struct = struct.Struct('B' * self.panel_width * self.panel_height * self.channels)
+                self.__panel_data = [0 for i in xrange(self.panel_width * self.panel_height * self.channels)]
             payload_data = self.full_frame_data_struct.unpack(data[12:])
         
         elif header_data[0] == self.dl_MAGIC_FRAME_PARTIAL:
             if not self.panel_width:
                 self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..                
+                self.channels = header_data[3]
             payload_data = self.partial_frame_data_struct.unpack(data[12:])
         
         elif header_data[0] == self.dl_MAGIC_NEW_CONNECTION:
@@ -65,23 +68,22 @@ class DottedLandscapeCommunicator(object):
     
     
     def encode_full_frame(self, data):
-        # always 3 channels, max value 255
-        return self.encode((self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, 3, 255),
+        return self.encode((self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, self.channels, 255),
                            data)
     
     
     def encode_partial_frame(self, x, y, color):
         print "partial frame encode with", x, y, color[0], color[1], color[2]
-        return self.header_struct.pack(self.dl_MAGIC_FRAME_PARTIAL, self.panel_height, self.panel_width, 3, 255) +\
+        return self.header_struct.pack(self.dl_MAGIC_FRAME_PARTIAL, self.panel_height, self.panel_width, self.channels, 255) +\
                self.partial_frame_data_struct.pack(int(x), int(y), int(color[0]), int(color[1]), int(color[2])) 
 
     
     def send(self, packet):
         ''' send change notification to the server '''
-        self.send_socket.sendto(packet, 0, (self.host, self.port))
+        self.send_socket.sendto(packet, 0, (self.server_host, self.server_port))
         
     
-    def on_socket_receive(self, fd, events):
+    def check_for_data(self):
         try:
             data = self.receive_socket.recv(4096)
             headers, payload = self.decode(data)
@@ -92,21 +94,35 @@ class DottedLandscapeCommunicator(object):
                 print "DLCOMM >> valid frame found"
                 return payload
         except socket.error:
-            print "DLCOMM >> nothing to receive?"
+            pass # print "DLCOMM >> nothing to receive?"
+        return None
         
 
     def connect(self, host, port):
         print "DLCOMM >> connect to", host, ":", port
-        self.host = host
-        self.port = port
-        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.server_host = host
+        self.server_port = port
         receive_port = port + 1
+        retries = 0
+        connected = False
+        while not connected:
+            receive_port += 1
+            self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            try:
+                self.receive_socket.bind(("0.0.0.0", receive_port))
+                connected = True
+            except socket.error:
+                retries += 1
+                if retries > 30:
+                    print "DLCOMM >> failed to initialize connection"
+                    return None #failed        
+        self.receive_socket.setblocking(0) # non-blocking
+        
         # handshake!
+        self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         packet = self.encode_handshake(host, receive_port)
         self.send_socket.sendto(packet, 0, (host, port))
-        self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.receive_socket.bind(("0.0.0.0", receive_port))
-        self.receive_socket.setblocking(0) # non-blocking
+            
         
     
     def disconnect(self):

@@ -108,6 +108,13 @@ div#main {
     -webkit-user-select: none;
 }
 
+#color div {
+    width: 36px;
+    height: 36px;
+    margin: 8px;
+    display: inline-block;
+    border: 1px solid black;
+}
 
 
 

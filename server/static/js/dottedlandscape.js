@@ -17,8 +17,19 @@ function panelCellPress(e) {
     }
 }
 
+function changeColor(e) {
+    var s = $(this).css('background-color');
+    s = s.replace(' ', '');
+    s = s.split('(')[1].split(')')[0];
+    var colors = s.split(',');
+    
+    ACTIVE_COLOR = [parseInt(colors[0]), parseInt(colors[1]), parseInt(colors[2])];
+    log(ACTIVE_COLOR);
+}
 
-$(function() {
+$(function() {    
+    $('#color div').click(changeColor);
+    
     $('#panel td').mouseenter(panelCellPress);
     // $('#panel td').bind('touchmove', panelCellPress);
     
@@ -70,17 +81,12 @@ var panelUpdater = {
     },
 
     onSuccess: function(data) {
-        log('222 received data:' + data);
-        
         var counter = 0;
         $('#panel td').each(function (e) { 
             $(this).css('background-color', 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
             $(this).text(counter);
-            // log('set color to ' + 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
             counter += 3;
         });
-        log('update done')
-        
         panelUpdater.errorSleepTime = 500;
         window.setTimeout(panelUpdater.poll, 0);
     },

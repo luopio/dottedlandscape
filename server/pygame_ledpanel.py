@@ -9,13 +9,18 @@ circle_radius = 6
 circle_spacing = 10
 window_margins = (30, 30)
 
-def on_receive(header_data, data):
-    global led_panel_initialized, leds_x, leds_y
-    h, w = header_data[1], header_data[2]
+print "Panel: waiting for connections to determine panel size" 
+dlc = blip_receiver.DottedLandscapeCommunicator()
+dlc.connect('127.0.0.1', 2323)
+
+
+def on_receive(data):
+    global led_panel_initialized, leds_x, leds_y, dlc
+    h, w = dlc.panel_height, dlc.panel_width
     if not led_panel_initialized or leds_x != w or leds_y != h:
         global screen, clock, amount_of_channels
         width, height = w, h
-        amount_of_channels = header_data[3]
+        amount_of_channels = dlc.channels
         print "Panel: received new width, height", w, h, "on %s channels" % amount_of_channels
         
         pygame.init()
@@ -36,14 +41,10 @@ def on_receive(header_data, data):
         print "skip frame"
         pygame.event.clear()
 
-
-print "Panel: waiting for connections to determine panel size" 
-b = blip_receiver.BlipReceiver()
-b.add_observer(on_receive)
-b.start()
-
 try:
     while not led_panel_initialized:
+        data = dlc.check_for_data()
+        if data: on_receive(data)
         time.sleep(0.5)
 except KeyboardInterrupt:     
     b.stop()
@@ -52,28 +53,32 @@ except KeyboardInterrupt:
 done = False 
 while done == False:
     # limit cpu usage (max 10 frames per second)
-    # clock.tick(100)
-     
+    clock.tick(100)
+    
+    data = dlc.check_for_data()
+    if data: on_receive(data)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT: # user clicked close
             print "Panel: quit called. Have a good day!"
             done = True
             
-        elif event.type  == pygame.USEREVENT:
-            # print "received user event"
+        elif event.type == pygame.USEREVENT and event.data:
+            print "frame!"
             screen.fill((0, 0, 0))
-            for i in xrange(0, leds_x * leds_y):
-                x = (i * amount_of_channels % leds_x) * (circle_radius + circle_spacing) + window_margins[0]
-                y = (i * amount_of_channels / leds_x) * (circle_radius + circle_spacing) + window_margins[1]
+            i = 0
+            while i < leds_x * leds_y * amount_of_channels:
+                x = (i / amount_of_channels % leds_x) * (circle_radius + circle_spacing) + window_margins[0]
+                y = (i / amount_of_channels / leds_x) * (circle_radius + circle_spacing) + window_margins[1]
                 if amount_of_channels == 1:
                     rgb = [event.data[i], 0, 0]
                 elif amount_of_channels == 3:
                     rgb = [event.data[i], event.data[i+1], event.data[i+2]]
-                
+                i += amount_of_channels
                 pygame.draw.circle(screen, rgb, [x, y], circle_radius, 0)
-        
+            
             pygame.display.flip()
 
 # Be IDLE friendly
-b.stop()
+dlc.disconnect()
 pygame.quit ()
