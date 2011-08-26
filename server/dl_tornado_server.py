@@ -6,6 +6,8 @@ import tornado.httpserver
 from blip_receiver import DottedLandscapeCommunicator
     
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
+# define the panel here
+DL_COMMUNICATOR.define_panel(8, 8, 3)
 WEB_CLIENTS = []
 
 

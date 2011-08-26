@@ -6,14 +6,28 @@ var ACTIVE_COLOR = [255, 0, 0];
 function panelCellPress(e) {
     var x = $(this).attr('x');
     var y = $(this).attr('y');
+    panelCellPressAt(x, y);
+}
+
+function panelCellPressAt(x, y) {
     if(MOUSEBUTTONDOWN) {
         // log(e)
         // log('pressed '+x+','+y);
         $.post('/a/press', {'x': x, 'y': y, 
                 'c': ACTIVE_COLOR}, 
             function(data) {
-                log('server said:' + data)    
-            })
+                // log('server said:' + data)    
+            });
+    }
+}
+
+function panelCellPressStarted(e) { 
+    MOUSEBUTTONDOWN = true;
+    var el = $(e.target);
+    var x = el.attr('x');
+    var y = el.attr('y');
+    if(x && y) {
+        panelCellPressAt(x, y); 
     }
 }
 
@@ -33,8 +47,9 @@ $(function() {
     $('#panel td').mouseenter(panelCellPress);
     // $('#panel td').bind('touchmove', panelCellPress);
     
-    $('body').mousedown(function(e) { MOUSEBUTTONDOWN = true; })
-    $('body').bind('touchstart', function(e) { MOUSEBUTTONDOWN = true; })
+    $('body').mousedown(panelCellPressStarted);
+    $('body').bind('touchstart', panelCellPressStarted);
+    
     $('body').mouseup(function(e) { MOUSEBUTTONDOWN = false; })
     $('body').bind('touchend', function(e) { MOUSEBUTTONDOWN = false; })
     //$('body').bind('touchcancel', function(e) { MOUSEBUTTONDOWN = false; })
@@ -84,7 +99,7 @@ var panelUpdater = {
         var counter = 0;
         $('#panel td').each(function (e) { 
             $(this).css('background-color', 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
-            $(this).text(counter);
+            // $(this).text(counter);
             counter += 3;
         });
         panelUpdater.errorSleepTime = 500;
@@ -97,23 +112,4 @@ var panelUpdater = {
         window.setTimeout(panelUpdater.poll, panelUpdater.errorSleepTime);
     },
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

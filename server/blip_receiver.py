@@ -13,38 +13,41 @@ class DottedLandscapeCommunicator(object):
     dl_MAGIC_FRAME_PARTIAL = 0x114545 # partial frame with just changed dots
     dl_MAGIC_FRAME_FULL = 0x119898 # full frame received
     
-    def __init__(self):
+    def __init__(self, panel_changed_callback=None):
         self.header_struct = struct.Struct('!IHHHH') 
         self.partial_frame_data_struct = struct.Struct('!IIHHH') # x, y, r, g, b 
         self.new_conn_data_struct = struct.Struct('!HHHHI') # ip.ip.ip.ip, port
         self.full_frame_data_struct = None # constructed on first contact, when we know size
+        self.panel_changed_cb = panel_changed_callback
+        self.panel_width, self.panel_height = 0, 0
     
     
     def define_panel(self, width, height, channels):
         ''' called by the server to create the data struct '''
+        print "DLCOMM >>> panel defined as %s x %s w/ %s channels" % (width, height, channels)
         self.full_frame_data_struct = struct.Struct('B' * width * height * channels)
-    
+        self.panel_width, self.panel_height, self.channels = width, height, channels
+        if self.panel_changed_cb:
+            self.panel_changed_cb(width, height, channels)
     
     def decode(self, data):
         try:
             header_data = self.header_struct.unpack(data[:12])
         except struct.error:
-            print "dl_server: faulty header in decode len=%s" % len(data)
+            print "DLCOMM >>> faulty header in decode len=%s" % len(data)
             return None, None
         
         # this is a blip package or dl full frame (identical for now)
         if header_data[0] == self.blip_MAGIC_MCU_FRAME or header_data[0] == self.dl_MAGIC_FRAME_FULL:
-            if not self.full_frame_data_struct:
-                self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..
-                self.channels = header_data[3]
-                self.full_frame_data_struct = struct.Struct('B' * self.panel_width * self.panel_height * self.channels)
-                self.__panel_data = [0 for i in xrange(self.panel_width * self.panel_height * self.channels)]
+            print "full frame decoded: ", header_data[1:3]
+            if self.panel_width != header_data[2] or self.panel_height != header_data[1]:
+                self.define_panel(header_data[2], header_data[1], header_data[3])
             payload_data = self.full_frame_data_struct.unpack(data[12:])
         
         elif header_data[0] == self.dl_MAGIC_FRAME_PARTIAL:
-            if not self.panel_width:
-                self.panel_height, self.panel_width = header_data[1], header_data[2] # reversed..                
-                self.channels = header_data[3]
+            print "partial frame decoded: ", header_data[1:3]
+            if self.panel_width != header_data[2] or self.panel_height != header_data[1]:
+                self.define_panel(header_data[2], header_data[1], header_data[3])
             payload_data = self.partial_frame_data_struct.unpack(data[12:])
         
         elif header_data[0] == self.dl_MAGIC_NEW_CONNECTION:
@@ -54,12 +57,6 @@ class DottedLandscapeCommunicator(object):
         return header_data, payload_data
     
     
-    def encode(self, header_data, payload_data):
-        data = self.header_struct.pack(*header_data)
-        data += self.full_frame_data_struct.pack(*payload_data)
-        return data
-    
-    
     def encode_handshake(self, ip, port):
         ip0, ip1, ip2, ip3 = [int(i) for i in ip.split('.')]
         data = self.header_struct.pack(self.dl_MAGIC_NEW_CONNECTION, 0, 0, 0, 0) + \
@@ -67,13 +64,13 @@ class DottedLandscapeCommunicator(object):
         return data
     
     
-    def encode_full_frame(self, data):
-        return self.encode((self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, self.channels, 255),
-                           data)
+    def encode_full_frame(self, payload_data):
+        data = self.header_struct.pack(self.dl_MAGIC_FRAME_FULL, self.panel_height, self.panel_width, self.channels, 255)
+        data += self.full_frame_data_struct.pack(*payload_data)
+        return data
     
     
     def encode_partial_frame(self, x, y, color):
-        print "partial frame encode with", x, y, color[0], color[1], color[2]
         return self.header_struct.pack(self.dl_MAGIC_FRAME_PARTIAL, self.panel_height, self.panel_width, self.channels, 255) +\
                self.partial_frame_data_struct.pack(int(x), int(y), int(color[0]), int(color[1]), int(color[2])) 
 
