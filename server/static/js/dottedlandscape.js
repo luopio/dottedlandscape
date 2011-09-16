@@ -88,20 +88,26 @@ $(function() {
  */
 var panelUpdater = {
     errorSleepTime: 500,
+    previousDataPacket: null,
     
     poll: function() {
         $.ajax({url: "/a/update", dataType: "json", type: "GET",
-               success: panelUpdater.onSuccess,
-               error: panelUpdater.onError});
+                // ifModified: true, won't call success and thus cut the poll, needs another handler if used
+                cache: false,
+                success: panelUpdater.onSuccess,
+                error: panelUpdater.onError});
     },
 
-    onSuccess: function(data) {
-        var counter = 0;
-        $('#panel td').each(function (e) { 
-            $(this).css('background-color', 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
-            // $(this).text(counter);
-            counter += 3;
-        });
+    onSuccess: function(data, status) {
+        if(data != panelUpdater.previousDataPacket) {
+            var counter = 0;
+            $('#panel td').each(function (e) { 
+                $(this).css('background-color', 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
+                // $(this).text(counter);
+                counter += 3;
+            });
+            panelUpdater.previousDataPacket = data;
+        }
         panelUpdater.errorSleepTime = 500;
         window.setTimeout(panelUpdater.poll, 0);
     },

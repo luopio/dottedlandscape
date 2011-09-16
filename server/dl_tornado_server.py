@@ -39,7 +39,7 @@ class PanelUpdateHandler(tornado.web.RequestHandler):
     def get(self):
         WEB_CLIENTS.append(self.async_callback(self.on_panel_updated))
         self.set_header("Content-Type", "application/json")
-        print ">>>> got async request for update"
+        print ">>>> got async request for update on %s" % time.time()
         
     def on_panel_updated(self, data):
         if self.request.connection.stream.closed():
@@ -54,7 +54,7 @@ def notify_clients_on_panel_change(fd, events):
     if data:
         global WEB_CLIENTS
         for w in WEB_CLIENTS:
-            print "notify client!"
+            print "notify client %s!" % w
             w(data)
         WEB_CLIENTS = []
 
