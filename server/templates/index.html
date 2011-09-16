@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block body_id %}live{% end %}
 
-<div id="updated"></div>
+{% block content %}
 
 <div id="color">
     <div style="background:rgb(255, 0, 0);"></div>
@@ -18,9 +18,9 @@
     <thead></thead>
     <tfoot></tfoot>
     <tbody>
-        {% for y in range(0, 8) %}
+        {% for y in xrange(0, 8) %}
         <tr>
-            {% for x in range(0, 8) %}
+            {% for x in xrange(0, 8) %}
             <td x="{{x}}" y="{{y}}"></td>
             {% end %}
         </tr>
@@ -28,4 +28,50 @@
     </tbody>
 </table>
 
+<div id="saved-animations">
+    <h2> Saved animations </h2>
+    {% for a in saved_animations %}
+        <div class="saved-animation">
+            <span>{{ a[0] }} by <i>{{ a[1] }}</i></span>
+            <table>
+                <thead></thead>
+                <tfoot></tfoot>
+                <tbody>
+                    {% for y in xrange(0, 192, 24) %}
+                    <tr>
+                        {% for x in xrange(0, 24, 3) %}
+                        <td style="background-color: rgb({{a[2][x + y]}}, {{a[2][x + y + 1]}}, {{a[2][x + y + 2]}})"></td>
+                        {% end %}
+                    </tr>
+                    {% end %}
+                </tbody>
+            </table>
+            <div class="play-text" style="position: relative; top: -80px; width: 80px; 
+                height: 80px; display: none;">
+                <a href="" style="color: white; text-decoration: none; font-size: 3em;" animation-title="{{a[0]}}">PLAY</a>
+            </div> 
+        </div>
+    {% end %}
+</div>
+{% end %}
+
+
+{% block scripts %}
+<script type="text/javascript">
+    $(function() {
+        // input
+        panelInteraction.init();
+        // output
+        panelUpdater.init();
+        
+        $('.saved-animation').hover(function(e) { $(this).find('.play-text').fadeIn(); }, 
+                                    function(e) { $(this).find('.play-text').fadeOut(); });
+        
+        $('.saved-animation a').click(function(e) {
+            e.preventDefault(); 
+            var t = $(this).attr('animation-title');
+            panelInteraction.playAnimation(t);
+        });
+    });
+</script>
 {% end %}

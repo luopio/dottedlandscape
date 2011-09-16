@@ -86,15 +86,50 @@ a:hover { color: #036; }
  * Author: Lauri Kainulainen 
  */
 
+body#animate {
+    background: #888;
+    color: #f2f2f2;
+}
+
+body#live {
+    background: #111;
+    color: #f2f2f2;
+}
+
+body#text {
+    background: #777;
+    color: #000;
+}
+
 header, div#main, footer {
     padding: 4px;
 }
 
-header {
+header, footer {
     text-align: center;
 }
 
+footer {
+    font-size: 0.8em;
+}
+
+h2 {
+    text-transform: uppercase;
+    font-weight: normal;
+    padding: 8px 4px 4px 4px;
+}
+
+div#content, footer {
+    margin: auto;
+}
+
+/* content block wrapper */
 div#main {
+}
+
+#panel, #color, #frames, #controls {
+    margin: auto;
+    text-align: center;
 }
 
 #panel td {
@@ -102,8 +137,8 @@ div#main {
     height: 40px;
     text-align: center;
     vertical-align: middle;
-    background: #aaa;
-    border: 1px dotted #444;
+    background: #000;
+    border: 1px dotted #777;
     -moz-user-select: none;
     -webkit-user-select: none;
 }
@@ -117,12 +152,67 @@ div#main {
 }
 
 
+div#saved-animations {
+    margin: 8px 4px;
+    text-align: center;    
+}
 
+div#saved-animations div {
+    margin: auto;
+    font-size: 0.9em;
+    text-align: center;
+    width: 100px;
+}
 
+div#saved-animations table {
+    margin: auto;
+}
 
+div#saved-animations td {
+    width: 10px;
+    height: 10px;
+    border: 1px solid #333;
+}
 
+#frames {
+    margin-top: 8px;
+    padding: 2px;
+}
 
+#frames table {
+    padding: 0px 2px;
+}
 
+#frames td {
+    background: black;
+    border: 1px solid #333;
+}
+
+#add-frame {
+    padding: 0px 2px;
+    width: 50px;
+    height: 50px;
+    background: #eee;
+    color: #111;
+    display: inline-block;
+}
+
+#add-frame a {
+    font-size: 4em;
+    position: relative;
+    top: -10px;
+    text-decoration: none;
+}
+
+#controls a {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 8px;
+    background: #333;
+    color: #ddd;
+    cursor: pointer;
+    text-transform: uppercase;
+}
 
 
 

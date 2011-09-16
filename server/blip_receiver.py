@@ -30,6 +30,7 @@ class DottedLandscapeCommunicator(object):
         if self.panel_changed_cb:
             self.panel_changed_cb(width, height, channels)
     
+    
     def decode(self, data):
         try:
             header_data = self.header_struct.unpack(data[:12])

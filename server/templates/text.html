@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block body_id %}text{% end %}
+
+{% block content %}
+
+<div id="updated"></div>
+
+<div id="color">
+    <div style="background:rgb(255, 0, 0);"></div>
+    <div style="background:rgb(255, 255, 0);"></div>
+    <div style="background:rgb(255, 255, 255);"></div>
+    <div style="background:rgb(0, 255, 0);"></div>
+    <div style="background:rgb(0, 255, 255);"></div>
+    <div style="background:rgb(0, 0, 255);"></div>
+    <div style="background:rgb(0, 0, 0);"></div>
+</div>
+
+<table id="panel">
+    <thead></thead>
+    <tfoot></tfoot>
+    <tbody>
+        {% for y in range(0, 8) %}
+        <tr>
+            {% for x in range(0, 8) %}
+            <td x="{{x}}" y="{{y}}"></td>
+            {% end %}
+        </tr>
+        {% end %}
+    </tbody>
+</table>
+{% end %}
+
+
+{% block scripts %}
+<script type="text/javascript">
+    $(function() {
+        // input
+        panelInteraction.init();
+        // output
+        panelUpdater.init();
+      
+    });
+</script>
+{% end %}
