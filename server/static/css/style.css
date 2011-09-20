@@ -127,9 +127,17 @@ div#content, footer {
 div#main {
 }
 
-#panel, #color, #frames, #controls {
+/*#panel, #color, #frames, #controls, div#links {*/
+div#main div, div#main table {
     margin: auto;
     text-align: center;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    padding-bottom: 16px;
 }
 
 #panel td {
@@ -162,6 +170,21 @@ div#saved-animations div {
     font-size: 0.9em;
     text-align: center;
     width: 100px;
+    display: inline-block;
+    margin: 12px;
+    cursor: pointer;
+    padding: 8px 4px;
+    border: 1px solid transparent;
+}
+
+div#saved-animations div:hover {
+    border: 1px solid #777;
+}
+
+div#saved-animations span {
+    display: inline-block;
+    height: 45px;
+    overflow: hidden;
 }
 
 div#saved-animations table {
@@ -180,31 +203,36 @@ div#saved-animations td {
 }
 
 #frames table {
-    padding: 0px 2px;
+    padding: 0px 0px;
+    margin: 0px 2px !important;
+    border: 1px solid black;
 }
 
 #frames td {
     background: black;
-    border: 1px solid #333;
+    border: 0px solid #333;
 }
 
 #add-frame {
-    padding: 0px 2px;
-    width: 50px;
-    height: 50px;
+    padding: 0px;
+    margin: 0px 4px !important;
+    width: 40px;
+    height: 40px;
     background: #eee;
     color: #111;
     display: inline-block;
+    position: relative;
+    top: 6px;
 }
 
 #add-frame a {
-    font-size: 4em;
+    font-size: 3.5em;
     position: relative;
     top: -10px;
     text-decoration: none;
 }
 
-#controls a {
+a.button {
     display: inline-block;
     padding: 4px 8px;
     margin: 8px;
@@ -212,10 +240,25 @@ div#saved-animations td {
     color: #ddd;
     cursor: pointer;
     text-transform: uppercase;
+    text-decoration: none;
+    line-height: 18px;
 }
 
+a.button:hover {
+    color: #dfdfdf;
+    background: #444;
+}
 
+h3 {
+    text-transform: uppercase;
+    font-weight: normal;
+    font-size: 1.1em;
+    padding: 16px 2px 4px 2px;    
+}
 
+.selected-frame {
+    border: 1px solid white !important;
+}
 
 
 /**

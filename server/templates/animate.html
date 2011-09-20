@@ -4,6 +4,11 @@
 
 {% block content %}
 
+<div id="links">
+    <a href="/" class="button">Live</a>
+    <a href="/text/" class="button">Text</a>
+</div>
+
 <div id="color">
     <div style="background:rgb(255, 0, 0);"></div>
     <div style="background:rgb(255, 255, 0);"></div>
@@ -35,8 +40,18 @@
 </div>
 
 <div id="controls">
-    <a id="play-button">Play</a>
-    <a id="upload-button">Upload</a>
+    <a id="play-button" class="button">Play</a>
+</div>
+
+<div id="upload">
+    <h3>Upload and Share Animation</h3>
+    <label for="animation-title">Title</label>
+    <input type="text" name="animation-title" id="animation-title" />
+    <br />
+    <label for="animation-author">Author</label>
+    <input type="text" name="animation-author" id="animation-author" />
+    <br />
+    <a id="upload-button" class="button">Upload</a>
 </div>
 {% end %}
 

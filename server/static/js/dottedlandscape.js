@@ -45,16 +45,18 @@ var panelInteraction = {
             }
         });
         
-        // support changing colors
+        /* support changing colors */
         $('#color div').click(panelInteraction.colorSelectionEvent);
         panelInteraction.changeCallback = changeCallback;
         panelInteraction.justLocal = justLocal;
     },
         
     cellPressedEvent: function(e) {
-        var x = $(this).attr('x');
-        var y = $(this).attr('y');
-        panelInteraction.cellPressedAt(x, y);
+        if(panelInteraction.mouseButtonDown) {
+            var x = $(this).attr('x');
+            var y = $(this).attr('y');
+            panelInteraction.cellPressedAt(x, y);
+        }
     },
     
     cellPressedAt: function(x, y) {

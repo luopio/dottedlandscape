@@ -4,14 +4,19 @@
 
 {% block content %}
 
+<div id="links">
+    <a href="/animate/" class="button">Animate</a>
+    <a href="/text/" class="button">Text</a>
+</div>
+
 <div id="color">
     <div style="background:rgb(255, 0, 0);"></div>
     <div style="background:rgb(255, 255, 0);"></div>
     <div style="background:rgb(255, 255, 255);"></div>
     <div style="background:rgb(0, 255, 0);"></div>
     <div style="background:rgb(0, 255, 255);"></div>
-    <div style="background:rgb(0, 0, 255);"></div>
-    <div style="background:rgb(0, 0, 0);"></div>
+    <div style="background:rgb(0, 0, 255); border: 1px solid #eee;"></div>
+    <div style="background:rgb(0, 0, 0); border: 1px solid #eee;"></div>
 </div>
 
 <table id="panel">
@@ -31,7 +36,7 @@
 <div id="saved-animations">
     <h2> Saved animations </h2>
     {% for a in saved_animations %}
-        <div class="saved-animation">
+        <div animation-title="{{a[0]}}">
             <span>{{ a[0] }} by <i>{{ a[1] }}</i></span>
             <table>
                 <thead></thead>
@@ -46,10 +51,6 @@
                     {% end %}
                 </tbody>
             </table>
-            <div class="play-text" style="position: relative; top: -80px; width: 80px; 
-                height: 80px; display: none;">
-                <a href="" style="color: white; text-decoration: none; font-size: 3em;" animation-title="{{a[0]}}">PLAY</a>
-            </div> 
         </div>
     {% end %}
 </div>
@@ -64,10 +65,7 @@
         // output
         panelUpdater.init();
         
-        $('.saved-animation').hover(function(e) { $(this).find('.play-text').fadeIn(); }, 
-                                    function(e) { $(this).find('.play-text').fadeOut(); });
-        
-        $('.saved-animation a').click(function(e) {
+        $('#saved-animations div').click(function(e) {
             e.preventDefault(); 
             var t = $(this).attr('animation-title');
             panelInteraction.playAnimation(t);
