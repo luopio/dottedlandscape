@@ -18,8 +18,10 @@ var panelInteraction = {
         $('body').mousedown(panelInteraction.cellPressStartedEvent);
         $('body').bind('touchstart', panelInteraction.cellPressStartedEvent);
         
-        $('body').mouseup(function(e) { panelInteraction.mouseButtonDown = false; })
-        $('body').bind('touchend', function(e) { panelInteraction.mouseButtonDown = false; })
+        $('body').mouseup(function(e) { 
+            panelInteraction.mouseButtonDown = false; })
+        $('body').bind('touchend', function(e) { 
+            panelInteraction.mouseButtonDown = false; })
         
         
         var panelWidth = $('#panel').width();
@@ -40,7 +42,7 @@ var panelInteraction = {
                 if(y < $(this).height() && y > 0) {
                     var row = Math.round(y / panelHeight * 8) - 1;
                     var col = Math.round(x / panelWidth * 8) - 1;
-                    panelInteraction.cellPressAt(col, row);
+                    panelInteraction.cellPressedAt(col, row);
                 }
             }
         });
