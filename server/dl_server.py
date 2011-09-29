@@ -109,6 +109,7 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     
     
     def start(self):
+        print "start"
         self.keep_on_doing_it = True
         self.listen_all()
         gevent.spawn(self.panel_fadeout)
@@ -145,6 +146,10 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
                     # self.__panel_data[i] *= 0.7
                     i += 1
             gevent.sleep(3)
+    
+    
+    def get_panel_data(self):
+        return self.__panel_data
     
           
     def quit(self):
