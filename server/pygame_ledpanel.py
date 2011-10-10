@@ -1,6 +1,6 @@
 import pygame, time, sys
 
-import blip_receiver
+from blip_receiver import DottedLandscapeCommunicator
 
 led_panel_initialized = False
 clock, screen = None, None
@@ -10,7 +10,7 @@ circle_spacing = 10
 window_margins = (30, 30)
 
 print "Panel: waiting for connections to determine panel size" 
-dlc = blip_receiver.DottedLandscapeCommunicator()
+dlc = DottedLandscapeCommunicator()
 dlc.connect('127.0.0.1', 2323)
 
 
@@ -55,14 +55,17 @@ while done == False:
     # limit cpu usage (max 10 frames per second)
     clock.tick(100)
     
+    # get any incoming data from the DL server
     data = dlc.check_for_data()
     if data: on_receive(data)
     
     for event in pygame.event.get():
-        if event.type == pygame.QUIT: # user clicked close
+        # user clicked close button
+        if event.type == pygame.QUIT:
             print "Panel: quit called. Have a good day!"
             done = True
-            
+        
+        # new frame received!
         elif event.type == pygame.USEREVENT and event.data:
             print "frame!"
             screen.fill((0, 0, 0))

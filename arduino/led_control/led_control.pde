@@ -1,52 +1,66 @@
 #include <Sprite.h>
 #include <Matrix.h>
 
-/* create a new Matrix instance
-data  (din) load  (load) clock (clk)
+/* 
+ Create a new Matrix instance to control the MAX7219
+ data (din)  load (load)  clock (clk)
 */
-Matrix myMatrix = Matrix(10, 12, 11);
+Matrix ledMatrix = Matrix(10, 12, 11);
 
-/* create a new Sprite instance
-   8 pixels wide, 4 pixels tall
-*/
-Sprite wave = Sprite(
-  8, 8,
-  B11111111,
-  B00000000,
-  B00000000,
-  B10101010,
-  B00000000,
-  B01010101,
-  B00000000,
-  B00000000
-);
+int y = 0;
+byte headerByte = 0;
+byte redByte = 0;
+byte blueByte = 0;
+byte greenByte = 0;
 
 void setup()
 { 
+  Serial.begin(19200);
 }
-
-int x = 0;
-int y = 7;
 
 void loop()
 {
-  // myMatrix.write(x, 0, wave);     // place sprite on screen
-  // myMatrix.write(x - 8, 2, wave); // place sprite again, elsewhere on screen
-  myMatrix.write(y,0,1);
-  myMatrix.write(y,1,1);
-  myMatrix.write(y,2,1);
-  myMatrix.write(y,3,1);
-  myMatrix.write(y,4,1);
-  myMatrix.write(y,5,1);
-  myMatrix.write(y,6,1);
-  myMatrix.write(y,7,1);
-  
-  delay(75);                      // wait a little bit
-  myMatrix.clear();               // clear the screen for next animation frame
-  y++;
-  if(y == 8)                      // if reached end of animation sequence
+  if (Serial.available() > 0) 
   {
-    y = 0;                        // start from beginning
-  }
+    // look for the header byte that should be 0
+    // used for syncing
+    while(Serial.available()) 
+    {
+      headerByte = Serial.read();
+      if(headerByte == 255) {
+        break;
+      }
+    }
+      
+    ledMatrix.clear();
+    y = 0;
+    while(y < 8) 
+    {
+      // get incoming frame data
+      redByte = Serial.read();
+      greenByte = Serial.read();
+      blueByte = Serial.read();
+      
+      // mind bogling 1..0 indexing!
+      // first byte for is for the red row
+      ledMatrix.write(1, y, redByte & 1);
+      ledMatrix.write(2, y, redByte & 2);
+      ledMatrix.write(3, y, redByte & 4);
+      ledMatrix.write(4, y, redByte & 8);
+      ledMatrix.write(5, y, redByte & 16);
+      ledMatrix.write(6, y, redByte & 32);
+      ledMatrix.write(7, y, redByte & 64);
+      ledMatrix.write(0, y, redByte & 128);
+      // green..
+      // blue..
+      
+      y++;
+    }
+    
+  } 
+  // Serial.flush();
+  // delay(100);    
+  
+
 }
 
