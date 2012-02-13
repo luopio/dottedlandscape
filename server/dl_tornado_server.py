@@ -3,9 +3,12 @@ import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 import redis
+from tornadio2 import SocketConnection, TornadioRouter
 
 from blip_receiver import DottedLandscapeCommunicator
-    
+from text_writer import TextWriter
+
+TEXT_WRITER = TextWriter()
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
 # define the panel here
 DL_COMMUNICATOR.define_panel(8, 8, 3)
@@ -24,6 +27,31 @@ class AnimateHandler(tornado.web.RequestHandler):
 class TextHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/text.html")
+
+
+class PlayMessageHandler(tornado.web.RequestHandler):
+    def post(self):
+        args = self.request.arguments
+        message = args['message'][0]
+        
+        # FIXME: maybe move to an exact color definition
+        color = args['colorName'][0]
+        if color == 'red': active_channel_index = 0
+        elif color == 'green': active_channel_index = 1
+        else: active_channel_index = 2
+        
+        if message and len(message) < 100:
+            print "play message", message
+            frames = TEXT_WRITER.get_all_frames(message, active_channel_index)
+            pt = PlayAnimationThread()
+            pt.speed = 800
+            pt.frames = frames
+            pt.start()
+            self.set_header("Content-Type", "application/json")
+            self.write('ok')
+        else:
+            self.set_header("Content-Type", "application/json")
+            self.write('fail: no message or message too long')
     
 
 class PanelPressedHandler(tornado.web.RequestHandler):
@@ -40,16 +68,24 @@ class PanelPressedHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "application/json")
         self.write('ok')
         
-     
+
 class PanelUpdateHandler(tornado.web.RequestHandler):
     @tornado.web.asynchronous
     def get(self):
+        args = self.request.arguments
+        print args
+        i_want_update_now = args.has_key('sync')
+        if i_want_update_now:
+            if DL_COMMUNICATOR._cached_payload:
+                self.on_panel_updated(DL_COMMUNICATOR._cached_payload)
+                
         WEB_CLIENTS.append(self.async_callback(self.on_panel_updated))
         self.set_header("Content-Type", "application/json")
-        print ">>>> got async request for update on %s" % time.time()
+        print ">>>> got request for update on %s" % time.time()
         
     def on_panel_updated(self, data):
         if self.request.connection.stream.closed():
+            print "STREAM CLOSED"
             return
         print "<<<< finishing async request"
         self.finish(tornado.escape.json_encode(data))
@@ -65,6 +101,7 @@ def notify_clients_on_panel_change(fd, events):
         WEB_CLIENTS = []
 
 
+# TODO: move animation to another file?
 class SaveAnimationHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
@@ -91,7 +128,8 @@ class SaveAnimationHandler(tornado.web.RequestHandler):
         print "animation save: ", speed, channels, name, author
         save_animation_to_db(name, frame_save_structure)
         self.set_header("Content-Type", "application/json")
-        self.write('saved as %s' % name)
+        json = tornado.escape.json_encode({'status': 'ok', 'name': name})
+        self.write(json)
 
 
 class PlayAnimationHandler(tornado.web.RequestHandler):
@@ -109,6 +147,7 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
 class PlayAnimationThread(threading.Thread):
     frames = []
     speed = 0
+
     def run(self):
         for frame in self.frames:
             print "PLAY FRAME THREAD WITH LEN %s " % len(frame)
@@ -139,24 +178,37 @@ def get_all_animations():
         anims.append((j['title'], j['author'], j['frames'][0]))
     return anims
 
+
+
+class SocketIOUpdaterConnection(SocketConnection):
+    def on_message(self, msg):
+        print "socket.io => got message!", msg
+    
+    def on_open(self, msg):
+        pass
+    
+    def on_close(self, msg):
+        pass
+
+SocketIORouter = TornadioRouter(SocketIOUpdaterConnection)
     
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     'debug': True,
+    'socket_io_port': 9000,
 }
 
 application = tornado.web.Application([
-    (r"/", LiveHandler),
-    (r"/animate/", AnimateHandler),
-    (r"/text/", TextHandler),
-    (r"/a/press", PanelPressedHandler),
-    (r"/a/update", PanelUpdateHandler),
-    (r"/a/save-animation", SaveAnimationHandler),    
-    (r"/a/play-animation", PlayAnimationHandler),    
-    #(r"/js/(\w+)",  tornado.web.StaticFileHandler, dict(path='static/js')),
-    #(r"/img/(\w+)", tornado.web.StaticFileHandler, dict(path='static/img')),
-    #(r"/css/(\w+)", tornado.web.StaticFileHandler, dict(path='static/css')),
-], **settings)
+    (r"/",                  LiveHandler),
+    (r"/animate/",          AnimateHandler),
+    (r"/text/",             TextHandler),
+    
+    (r"/a/message",         PlayMessageHandler),
+    (r"/a/press",           PanelPressedHandler),
+    (r"/a/update",          PanelUpdateHandler),
+    (r"/a/save-animation",  SaveAnimationHandler),    
+    (r"/a/play-animation",  PlayAnimationHandler),    
+] + SocketIORouter.urls, **settings)
 
 if __name__ == "__main__":
     application.listen(8888)

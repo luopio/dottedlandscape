@@ -12,13 +12,21 @@ class TextWriter(object):
     def update(self):
         pass
     
-    def write(self, letter, data_structure, offset=0):
+    def write(self, letter, data_structure, offset=0, active_channel_index=0):
         if letter in alphabet.ALPHABET_BITS:
             bits = alphabet.ALPHABET_BITS[letter]
             for i in xrange(offset, len(data_structure) / self.channels):
-                data_structure[i * self.channels] = bits[i] * 255
+                data_structure[i * self.channels + active_channel_index] = bits[i] * 255
+        return data_structure
                 
-                
+    def get_all_frames(self, message, active_channel_index=0):
+        # FIXME: hardcoded here. move into a generator to save mem?
+        frames = []
+        message = message.lower()
+        for l in message:
+            data_buffer = self.write(l, [0 for i in xrange(8*8*3)], active_channel_index=active_channel_index)
+            frames.append(data_buffer)
+        return frames    
                 
 if __name__=='__main__':
     # this is not the way to go IRL

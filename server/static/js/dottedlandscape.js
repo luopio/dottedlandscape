@@ -42,7 +42,19 @@ var panelInteraction = {
                 if(y < $(this).height() && y > 0) {
                     var row = Math.round(y / panelHeight * 8) - 1;
                     var col = Math.round(x / panelWidth * 8) - 1;
-                    panelInteraction.cellPressedAt(col, row);
+                    /*
+                    var cellWidth = panelWidth / 8;
+                    var cellHeight = panelHeight / 8;
+                    var cellLeftEdgeDelta = x - col * cellWidth;
+                    var cellTopEdgeDelta = y - row * cellHeight;
+                    */                    
+                    // alert('deltas: ' + cellLeftEdgeDelta + ", " + cellTopEdgeDelta+' w/h ' + cellWidth + ", " + cellHeight);
+                    //if (cellLeftEdgeDelta > cellWidth * 0.1 && cellLeftEdgeDelta < cellWidth * 0.9) {
+                    //    if (cellTopEdgeDelta > cellHeight * 0.1 && cellTopEdgeDelta < cellHeight * 0.9) {
+                            panelInteraction.cellPressedAt(col, row);
+                    //    }
+                    //}
+                    
                 }
             }
         });
@@ -88,6 +100,8 @@ var panelInteraction = {
     },
     
     colorSelectionEvent: function(e) {
+        $(this).parent().find('div').removeClass('active');
+        $(this).addClass('active');
         var s = $(this).css('background-color');
         s = s.replace(' ', '');
         s = s.split('(')[1].split(')')[0];
@@ -122,8 +136,13 @@ var panelUpdater = {
     },
     
     init: function() {
-        log('panelUpdater: init')
-        panelUpdater.poll();
+        log('panelUpdater: init');
+        $.ajax({url: "/a/update", dataType: "json", type: "GET",
+                cache: false,
+                data: {'sync': 1},
+                success: panelUpdater.onSuccess,
+                error: panelUpdater.onError});
+        // panelUpdater.poll();
     },
 
     onSuccess: function(data, status) {

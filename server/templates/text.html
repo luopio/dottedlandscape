@@ -4,19 +4,29 @@
 
 {% block content %}
 
-<div id="updated"></div>
-
-<div id="color">
-    <div style="background:rgb(255, 0, 0);"></div>
-    <div style="background:rgb(255, 255, 0);"></div>
-    <div style="background:rgb(255, 255, 255);"></div>
-    <div style="background:rgb(0, 255, 0);"></div>
-    <div style="background:rgb(0, 255, 255);"></div>
-    <div style="background:rgb(0, 0, 255);"></div>
-    <div style="background:rgb(0, 0, 0);"></div>
+<div id="links">
+    <a href="/" class="button">Live</a>
+    <a href="/animate/" class="button">Animate</a>
 </div>
 
-<table id="panel">
+<div id="color" class="color-selection">
+    <!-- 
+     <div style="background:rgb(255, 255, 0);"></div>
+    <div style="background:rgb(255, 255, 255);"></div>
+    <div style="background:rgb(0, 255, 255);"></div>
+    -->
+    <div class="active" style="background:rgb(255, 0, 0);" data-color="red"></div>
+    <div style="background:rgb(0, 255, 0);" data-color="green"></div>
+    <div style="background:rgb(0, 0, 255);" data-color="blue"></div>
+</div>
+
+
+<form action="" method="">
+    <input type="text" name="message" id="message" />
+    <input type="button" value="send" id="send-button" />
+</form>
+
+<table id="panel" class="smaller-live-panel">
     <thead></thead>
     <tfoot></tfoot>
     <tbody>
@@ -29,16 +39,35 @@
         {% end %}
     </tbody>
 </table>
+
 {% end %}
 
 
 {% block scripts %}
 <script type="text/javascript">
     $(function() {
-        // input
-        panelInteraction.init();
+        // no input
+        // panelInteraction.init();
         // output
+        var ACTIVE_COLOR = 'red';
+        
+        $('div.color-selection div').click(function(e) {
+            $(this).parent().find('div').removeClass('active');
+            $(this).addClass('active');
+            ACTIVE_COLOR = $(this).data('color');
+        })
+        
         panelUpdater.init();
+        $('#send-button').click(function(e) {
+            var txt = $('#message').val();
+            if(txt) {
+                if(txt.length > 100) {
+                    alert('Please keep the message length to under 100 characters. Thanks.');
+                    return;
+                }
+                $.post('/a/message', {message: txt, colorName: ACTIVE_COLOR});    
+            }
+        })
       
     });
 </script>

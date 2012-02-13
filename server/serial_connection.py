@@ -11,7 +11,8 @@ class SerialConnection(object):
         self.full_frame_struct = struct.Struct('<B' + 'B' * 8 * 3) # one byte per row, per channel 
     
     def connect(self):
-        self.ser = serial.Serial('/dev/ttyUSB1', 19200)
+        # ttyACM0
+        self.ser = serial.Serial('/dev/ttyACM0', 19200)
         
         # self.ser.setTimeout(0.8)
         # line = self.ser.read(58)
@@ -68,7 +69,7 @@ if __name__ == '__main__':
                         blue_value += 1 << u
                     i += 1
                     
-                print bin(red_value)
+                # print bin(red_value)
                 frame.append( red_value )
                 frame.append( green_value )
                 frame.append( blue_value )

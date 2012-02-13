@@ -20,7 +20,7 @@ class DottedLandscapeCommunicator(object):
         self.full_frame_data_struct = None # constructed on first contact, when we know size
         self.panel_changed_cb = panel_changed_callback
         self.panel_width, self.panel_height = 0, 0
-    
+        self._cached_payload = None
     
     def define_panel(self, width, height, channels):
         ''' called by the server to create the data struct '''
@@ -90,6 +90,7 @@ class DottedLandscapeCommunicator(object):
             
             if headers[0] in (self.blip_MAGIC_MCU_FRAME, self.dl_MAGIC_FRAME_FULL, self.dl_MAGIC_FRAME_PARTIAL):
                 print "DLCOMM >> valid frame found"
+                self._cached_payload = payload
                 return payload
         except socket.error:
             pass # print "DLCOMM >> nothing to receive?"

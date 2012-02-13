@@ -9,14 +9,16 @@
     <a href="/text/" class="button">Text</a>
 </div>
 
-<div id="color">
-    <div style="background:rgb(255, 0, 0);"></div>
-    <div style="background:rgb(255, 255, 0);"></div>
+<div id="color" class="color-selection">
+    <!-- 
+     <div style="background:rgb(255, 255, 0);"></div>
     <div style="background:rgb(255, 255, 255);"></div>
-    <div style="background:rgb(0, 255, 0);"></div>
     <div style="background:rgb(0, 255, 255);"></div>
-    <div style="background:rgb(0, 0, 255); border: 1px solid #eee;"></div>
-    <div style="background:rgb(0, 0, 0); border: 1px solid #eee;"></div>
+    -->
+    <div class="active" style="background:rgb(255, 0, 0);"></div>
+    <div style="background:rgb(0, 255, 0);"></div>
+    <div style="background:rgb(0, 0, 255);"></div>
+    <div style="background:rgb(0, 0, 0);"></div>
 </div>
 
 <table id="panel">
@@ -60,6 +62,7 @@
 {% block scripts %}
 <script type="text/javascript">
     $(function() {
+        
         // input
         panelInteraction.init();
         // output

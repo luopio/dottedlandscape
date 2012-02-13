@@ -85,10 +85,10 @@ var animation = {
             { data: animation.frames, channels: 3, speed: animation.animationSpeed,
               title: $('#animation-title').val(), author: $('#animation-author').val() }, 
             function(data) {
-                log('save animation: server said:' + data)
-                if(data && data != 'FAIL') {
+                //log('save animation: server said:' + data)
+                //if(data && data != 'FAIL') {
                     alert('Animation saved! You can now play it in the Live view.')
-                }    
+                //}  
             }, 
             'json'
         );

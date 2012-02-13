@@ -102,7 +102,7 @@ body#text {
 }
 
 header, div#main, footer {
-    padding: 4px;
+    padding: 0;
 }
 
 header, footer {
@@ -111,6 +111,8 @@ header, footer {
 
 footer {
     font-size: 0.8em;
+    width: 100%;
+    margin: 4em auto;
 }
 
 h2 {
@@ -119,18 +121,27 @@ h2 {
     padding: 8px 4px 4px 4px;
 }
 
-div#content, footer {
+div#content {
     margin: auto;
 }
 
 /* content block wrapper */
 div#main {
+    margin: auto;
 }
 
 /*#panel, #color, #frames, #controls, div#links {*/
-div#main div, div#main table {
+div#main div {
     margin: auto;
     text-align: center;
+}
+
+div#main div#links {
+    margin: 0 auto 1.5em auto;
+    
+}
+div#main div#links a {
+    min-width: 8em;
 }
 
 label {
@@ -140,9 +151,26 @@ label {
     padding-bottom: 16px;
 }
 
+table#panel {
+    /*width: 100%;*/
+    margin: auto;
+}
+
+form {
+    margin: auto;
+    width: 100%;
+}
+
+form input {
+    display: block;
+    font-size: 1.8em;
+    padding: 8px;
+    margin: 0.5em auto;
+}
+
 #panel td {
-    width: 40px;
-    height: 40px;
+    width: 1cm; /* 12.5% */
+    height: 1cm; /*40px;*/
     text-align: center;
     vertical-align: middle;
     background: #000;
@@ -151,27 +179,32 @@ label {
     -webkit-user-select: none;
 }
 
-#color div {
-    width: 36px;
-    height: 36px;
-    margin: 8px;
-    display: inline-block;
-    border: 1px solid black;
+#panel.smaller-live-panel td {
+    width: 0.2cm; /* 12.5% */
+    height: 0.2cm; /*40px;*/
+    text-align: center;
+    vertical-align: middle;
+    background: #000;
+    border: 1px dotted #777;
+    -moz-user-select: none;
+    -webkit-user-select: none;
 }
-
 
 div#saved-animations {
     margin: 8px 4px;
-    text-align: center;    
+    text-align: center;
+    max-width: 35em;
+    overflow: hidden;
 }
 
 div#saved-animations div {
     margin: auto;
     font-size: 0.9em;
     text-align: center;
-    width: 100px;
-    display: inline-block;
-    margin: 12px;
+    width: 40%;
+    height: 10em;
+    overflow: hidden;
+    float: left;
     cursor: pointer;
     padding: 8px 4px;
     border: 1px solid transparent;
@@ -258,6 +291,18 @@ h3 {
 
 .selected-frame {
     border: 1px solid white !important;
+}
+
+div.color-selection div {
+    width: 36px;
+    height: 36px;
+    margin: 8px;
+    display: inline-block;
+    border: 4px solid #444;
+}
+
+div.color-selection div.active {
+    border: 4px solid white;
 }
 
 
