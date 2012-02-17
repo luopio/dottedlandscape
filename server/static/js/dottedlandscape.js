@@ -43,13 +43,13 @@ var panelInteraction = {
             var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
             var y = touch.pageY - elm.top;
             */
-            $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight)
+            // $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight)
             if(x < panelWidth && x > 0) {
                 if(y < panelHeight && y > 0) {
                     var row = Math.floor(y / panelHeight * 8);
                     var col = Math.floor(x / panelWidth * 8);
-                    $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight + 
-                        "col, row="+col+", "+ row +" mousedown? "+panelInteraction.mouseButtonDown);
+                    //$('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight + 
+                    //    "col, row="+col+", "+ row +" mousedown? "+panelInteraction.mouseButtonDown);
                     /*
                     var cellWidth = panelWidth / 8;
                     var cellHeight = panelHeight / 8;
@@ -87,7 +87,7 @@ var panelInteraction = {
                 $.post('/a/press', {'x': x, 'y': y, 
                         'c': panelInteraction.activeColor}, 
                     function(data) {
-                        $('footer').text("OK");
+                        // $('footer').text("OK");
                         // log('server said:' + data)    
                     }
                 );

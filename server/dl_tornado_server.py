@@ -36,13 +36,10 @@ class PlayMessageHandler(tornado.web.RequestHandler):
         color = args['color[]']
         
         print "MESSAGE COLOR:", color
-        if color[0] == int(255): active_channel_index = 0
-        elif color[1] == int(255): active_channel_index = 1
-        else: active_channel_index = 2
         
         if message and len(message) < 100:
             print "PLAY MESSAGE", message
-            frames = TEXT_WRITER.get_all_frames(message, active_channel_index)
+            frames = TEXT_WRITER.get_all_frames(message, color)
             pt = PlayAnimationThread()
             pt.frames = frames
             pt.start()
