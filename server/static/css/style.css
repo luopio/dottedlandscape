@@ -118,19 +118,17 @@ footer {
 h2 {
     text-transform: uppercase;
     font-weight: normal;
-    padding: 8px 4px 4px 4px;
+    margin: 2em 0 1em 0;
 }
 
 div#content {
     margin: auto;
 }
 
-/* content block wrapper */
+/* Content block wrapper */
 div#main {
     margin: auto;
 }
-
-/*#panel, #color, #frames, #controls, div#links {*/
 div#main div {
     margin: auto;
     text-align: center;
@@ -144,28 +142,55 @@ div#main div#links a {
     min-width: 8em;
 }
 
-label {
-    display: inline-block;
-    width: 100px;
-    text-align: right;
-    padding-bottom: 16px;
+div#main div#links a span{
+    position: relative;
+    top: -2px;
 }
+
+
+div#main div#upload {
+    margin: 2em 0;
+}
+div#upload h3 {
+    border-top: 1px dotted #e2e2e2;    
+}
+
+div#upload label {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding-bottom: 4px;
+    text-transform: uppercase;
+    font-size: 0.8em;
+}
+
+div#upload input {
+    margin-bottom: 1em;
+}
+
 
 table#panel {
     /*width: 100%;*/
     margin: auto;
 }
 
-form {
-    margin: auto;
+div#main div#message-sending {
     width: 100%;
 }
 
+form {
+    text-align: center;
+}
+
 form input {
-    display: block;
     font-size: 1.8em;
     padding: 8px;
-    margin: 0.5em auto;
+    margin: 0.5em 0;
+}
+
+form input[type=button] {
+    text-transform: uppercase;
+    margin: 2em auto;
 }
 
 #panel td {
@@ -198,10 +223,10 @@ div#saved-animations {
 }
 
 div#saved-animations div {
-    margin: auto;
+    margin: 3% 3% 3% 0;
     font-size: 0.9em;
     text-align: center;
-    width: 40%;
+    width: 41%;
     height: 10em;
     overflow: hidden;
     float: left;
@@ -230,39 +255,65 @@ div#saved-animations td {
     border: 1px solid #333;
 }
 
-#frames {
-    margin-top: 8px;
-    padding: 2px;
+/* Contains the slider for the length of the frame */
+div#main div#frame-options {
+    width: 100%;
+    min-height: 2em;
+    margin: 1em 0 2em 0;
+}
+div#main div#frame-options div#slider{
+    margin: auto;
+}
+div#main div#frame-options div#frame-move-controls {
+    margin: 1em auto;
+    text-align: center;
+    display: none;
+}
+div#main div#frame-options div#frame-move-controls div {
+    display: inline-block;
+    font-size: 1.4em;
+    line-height: 1.4em;
+    margin: 0 1em;
+    padding: 0 1em;
 }
 
-#frames table {
-    padding: 0px 0px;
-    margin: 0px 2px !important;
+div#main div#frames {
+    margin: 0.5em 0;
+    overflow: hidden;
+}
+
+div#main div#frames table {
+    padding: 0;
+    margin: 0 0.6em 0.6em 0em;
     border: 1px solid black;
+    float: left;
 }
 
-#frames td {
+div#main div#frames td {
     background: black;
     border: 0px solid #333;
 }
 
-#add-frame {
-    padding: 0px;
-    margin: 0px 4px !important;
+div#main div#add-frame {
+    margin: 0;
     width: 40px;
     height: 40px;
     background: #eee;
     color: #111;
     display: inline-block;
-    position: relative;
-    top: 6px;
+    float: left;
 }
 
-#add-frame a {
+div#main div#add-frame a {
     font-size: 3.5em;
     position: relative;
     top: -10px;
     text-decoration: none;
+}
+
+div#main div#small-frames-container {
+    width: 100%;
+    text-align: center;
 }
 
 a.button {
@@ -293,15 +344,19 @@ h3 {
     border: 1px solid white !important;
 }
 
-div.color-selection div {
+div#main div.color-selection {
+    margin: 0 0 2em 0;
+}
+
+div#main div.color-selection div {
     width: 36px;
     height: 36px;
-    margin: 8px;
+    margin: 0.3em;
     display: inline-block;
     border: 4px solid #444;
 }
 
-div.color-selection div.active {
+div#main div.color-selection div.active {
     border: 4px solid white;
 }
 
@@ -320,22 +375,77 @@ div.color-selection div.active {
 .clearfix { zoom: 1; }
 
 
+/** MEDIA QUERIES */
+@media screen and (min-device-width: 600px) { 
+    div#main {
+        margin: 0 2em;
+    }
+    #panel td {
+        width: 2cm; /* 12.5% */
+        height: 2cm; /*40px;*/
+    }
+    #panel.smaller-live-panel td, div#main div#frames table td {
+        width: 0.3cm; /* 12.5% */
+        height: 0.3cm; /*40px;*/
+    }
+    div#saved-animations div {
+        width: 25%;
+    }
+    div#main div#add-frame {
+        width: 2.3cm;
+        height: 2.3cm;
+        font-size: 24px;
+    }
+    #add-frame a {
+        top: -16px;
+    }
 
-
-/**
- * Media queries for responsive design.
- *
- * These follow after primary styles so they will successfully override.
- */
+}
 
 @media all and (orientation:portrait) {
-  /* Style adjustments for portrait mode goes here */
 
 }
 
 @media all and (orientation:landscape) {
-  /* Style adjustments for landscape mode goes here */
-
+    h2 {
+        text-align: left;
+    }
+    div#main div#color {
+        float: right;
+        margin: 2em 0;
+        width: 50%;
+    }
+    div#main div#frame-options {
+        float: right;
+        width: 50%;
+    }
+    
+    div#main div#saved-animations {
+        width: 100%;
+    }
+    
+    table#panel:not(.smaller-live-panel) {
+        float: left;
+        margin: 2em 0;
+    }
+    
+    #panel td {
+        width: 1.5cm; /* 12.5% */
+        height: 1.5cm; /*40px;*/
+    }
+    
+    div#frames, div#controls {
+        float: left;
+        width: 100%;
+    }
+    div#upload {
+        float: left;
+        width: 100%;      
+    }
+    footer {
+        float: left;
+        
+    }
 }
 
 /* Grade-A Mobile Browsers (Opera Mobile, Mobile Safari, Android Chrome)

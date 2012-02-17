@@ -38,9 +38,9 @@ void loop()
     }
       
     // ledMatrix.clear();
-    redMatrix.clear();
-    blueMatrix.clear();
-    greenMatrix.clear();
+    //redMatrix.clear();
+    //blueMatrix.clear();
+    //greenMatrix.clear();
     y = 0;
     
     while(y < 8) 
@@ -102,7 +102,8 @@ void loop()
       y++;
     }
     
-  } 
+  }
+  
   Serial.flush();
   delay(100);    
   

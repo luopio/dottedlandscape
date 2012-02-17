@@ -25,11 +25,13 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     
     def plot(self, x, y, color):
         p = (x % self.panel_width + y * self.panel_width) * 3
-        # additive painting
-#        self.__panel_data[p]     = max(0, min(self.__panel_data[p]     + color[0], 255))
-#        self.__panel_data[p + 1] = max(0, min(self.__panel_data[p + 1] + color[1], 255))
-#        self.__panel_data[p + 2] = max(0, min(self.__panel_data[p + 2] + color[2], 255))
-        # absolute colors
+        
+        
+        #    self.__panel_data[p]     = max(0, min(self.__panel_data[p]     + color[0], 255))
+        #    self.__panel_data[p + 1] = max(0, min(self.__panel_data[p + 1] + color[1], 255))
+        #    self.__panel_data[p + 2] = max(0, min(self.__panel_data[p + 2] + color[2], 255))
+        # otherwise, including with 0, 0, 0, we do absolute colors
+        #else:
         self.__panel_data[p]     = color[0]
         self.__panel_data[p + 1] = color[1]
         self.__panel_data[p + 2] = color[2]

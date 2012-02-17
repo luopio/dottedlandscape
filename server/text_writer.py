@@ -25,7 +25,7 @@ class TextWriter(object):
         message = message.lower()
         for l in message:
             data_buffer = self.write(l, [0 for i in xrange(8*8*3)], active_channel_index=active_channel_index)
-            frames.append(data_buffer)
+            frames.append((data_buffer, 0.9)) # frame duration constant...
         return frames    
                 
 if __name__=='__main__':

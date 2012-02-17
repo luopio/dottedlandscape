@@ -33,15 +33,23 @@ var panelInteraction = {
          * tile in question
          */
         $('#panel').bind('touchmove',function(e){
-            e.preventDefault();
-            var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+            if(e.preventDefault) { e.preventDefault(); }
+            var touch = e.originalEvent.touches.item(0);
             var elm = $(this).offset();
+            var x = touch.clientX - elm.left; 
+            var y = touch.clientY - elm.top;
+            /*
             var x = touch.pageX - elm.left;
+            var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
             var y = touch.pageY - elm.top;
-            if(x < $(this).width() && x > 0) {
-                if(y < $(this).height() && y > 0) {
-                    var row = Math.round(y / panelHeight * 8) - 1;
-                    var col = Math.round(x / panelWidth * 8) - 1;
+            */
+            $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight)
+            if(x < panelWidth && x > 0) {
+                if(y < panelHeight && y > 0) {
+                    var row = Math.floor(y / panelHeight * 8);
+                    var col = Math.floor(x / panelWidth * 8);
+                    $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight + 
+                        "col, row="+col+", "+ row +" mousedown? "+panelInteraction.mouseButtonDown);
                     /*
                     var cellWidth = panelWidth / 8;
                     var cellHeight = panelHeight / 8;
@@ -67,8 +75,8 @@ var panelInteraction = {
         
     cellPressedEvent: function(e) {
         if(panelInteraction.mouseButtonDown) {
-            var x = $(this).attr('x');
-            var y = $(this).attr('y');
+            var x = $(this).data('x');
+            var y = $(this).data('y');
             panelInteraction.cellPressedAt(x, y);
         }
     },
@@ -79,6 +87,7 @@ var panelInteraction = {
                 $.post('/a/press', {'x': x, 'y': y, 
                         'c': panelInteraction.activeColor}, 
                     function(data) {
+                        $('footer').text("OK");
                         // log('server said:' + data)    
                     }
                 );
@@ -92,9 +101,9 @@ var panelInteraction = {
     cellPressStartedEvent: function(e) { 
         panelInteraction.mouseButtonDown = true;
         var $el = $(e.target); // $(this) does not work
-        var x = $el.attr('x');
-        var y = $el.attr('y');
-        if(x && y) {
+        var x = $el.data('x');
+        var y = $el.data('y');
+        if($.isNumeric(x) && $.isNumeric(y)) {
             panelInteraction.cellPressedAt(x, y); 
         }
     },

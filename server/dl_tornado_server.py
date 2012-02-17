@@ -32,19 +32,18 @@ class TextHandler(tornado.web.RequestHandler):
 class PlayMessageHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
-        message = args['message'][0]
+        message = args['message'][0]        
+        color = args['color[]']
         
-        # FIXME: maybe move to an exact color definition
-        color = args['colorName'][0]
-        if color == 'red': active_channel_index = 0
-        elif color == 'green': active_channel_index = 1
+        print "MESSAGE COLOR:", color
+        if color[0] == int(255): active_channel_index = 0
+        elif color[1] == int(255): active_channel_index = 1
         else: active_channel_index = 2
         
         if message and len(message) < 100:
-            print "play message", message
+            print "PLAY MESSAGE", message
             frames = TEXT_WRITER.get_all_frames(message, active_channel_index)
             pt = PlayAnimationThread()
-            pt.speed = 800
             pt.frames = frames
             pt.start()
             self.set_header("Content-Type", "application/json")
@@ -105,7 +104,6 @@ def notify_clients_on_panel_change(fd, events):
 class SaveAnimationHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
-        speed = int(args['speed'][0])
         channels = int(args['channels'][0])
         name = args['title'][0]
         author = args['author'][0]
@@ -113,19 +111,23 @@ class SaveAnimationHandler(tornado.web.RequestHandler):
         # decode the frames from the sucky tornado variable handling
         counter = 0
         frames = []
-        while args.has_key('data[%s][]' % counter):
-            fr = args['data[%s][]' % counter]
+        print
+        print "ARGS:", args
+        print
+        while args.has_key('data[%s][data][]' % counter):
+            fr = args['data[%s][data][]' % counter]
+            print "FR", fr
             all_int_fr = []
             for f in fr:
                 all_int_fr.append(int(f))
             print "save frame - adding frame %s of len %s" % (counter, len(all_int_fr))
-            frames.append(all_int_fr)
+            frames.append((all_int_fr, args['data[%s][duration]' % counter][0]))
             counter += 1
         
-        frame_save_structure = {'speed': speed, 'channels': channels, 
+        frame_save_structure = {'channels': channels, 
                                 'title': name, 'author': author,
                                 'frames': frames}
-        print "animation save: ", speed, channels, name, author
+        print "animation save: ", name, author
         save_animation_to_db(name, frame_save_structure)
         self.set_header("Content-Type", "application/json")
         json = tornado.escape.json_encode({'status': 'ok', 'name': name})
@@ -139,21 +141,19 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
         a = load_animation_from_db(name)
         if a:
             pt = PlayAnimationThread()
-            pt.speed = a['speed']
             pt.frames = a['frames']
             pt.start()
             
 
 class PlayAnimationThread(threading.Thread):
     frames = []
-    speed = 0
 
     def run(self):
         for frame in self.frames:
-            print "PLAY FRAME THREAD WITH LEN %s " % len(frame)
-            p = DL_COMMUNICATOR.encode_full_frame(frame)
+            print "PLAY FRAME THREAD WITH LEN %s " % len(frame[0])
+            p = DL_COMMUNICATOR.encode_full_frame(frame[0])
             DL_COMMUNICATOR.send(p)
-            time.sleep(self.speed / 1000.)
+            time.sleep(float(frame[1]))
 
 
 def save_animation_to_db(key, val):
