@@ -1,6 +1,7 @@
-import pygame, time, sys
+import time, sys
+import pygame
 
-from blip_receiver import DottedLandscapeCommunicator
+from dl.communicator import DottedLandscapeCommunicator
 
 led_panel_initialized = False
 clock, screen = None, None

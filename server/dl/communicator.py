@@ -6,7 +6,8 @@ s = None
 
 class DottedLandscapeCommunicator(object):
     ''' Understands the dl protocol, which is an extension to the Blinkenlights project's
-        blip-protocol (i.e. this class can be used to talk with blip-protocol hosts as well '''
+        blip-protocol (i.e. this class can be used to talk with blip-protocol hosts as well).
+    '''
     
     blip_MAGIC_MCU_FRAME = 0x23542666
     dl_MAGIC_NEW_CONNECTION = 0x11AEEE
@@ -21,7 +22,8 @@ class DottedLandscapeCommunicator(object):
         self.panel_changed_cb = panel_changed_callback
         self.panel_width, self.panel_height = 0, 0
         self._cached_payload = None
-    
+
+
     def define_panel(self, width, height, channels):
         ''' called by the server to create the data struct '''
         print "DLCOMM >>> panel defined as %s x %s w/ %s channels" % (width, height, channels)

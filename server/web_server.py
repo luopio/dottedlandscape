@@ -1,29 +1,32 @@
 import os, time, threading
+
 import tornado.ioloop
 import tornado.web
 import tornado.httpserver
 import redis
-from tornadio2 import SocketConnection, TornadioRouter
 
-from blip_receiver import DottedLandscapeCommunicator
-from text_writer import TextWriter
+# include tornadio for socketio capabilities
+from tornadio2 import SocketConnection, TornadioRouter, event
+
+from dl.communicator import DottedLandscapeCommunicator
+from dl.text_writer import TextWriter
 
 TEXT_WRITER = TextWriter()
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
-# define the panel here
+
+# we define the panel here
 DL_COMMUNICATOR.define_panel(8, 8, 3)
 WEB_CLIENTS = []
+SOCKET_IO_CONNECTIONS = []
 
-
+# Static handlers
 class LiveHandler(tornado.web.RequestHandler):
     def get(self):
         anims = get_all_animations()
         self.render("templates/index.html", saved_animations=anims)
-
 class AnimateHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/animate.html")
-
 class TextHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/text.html")
@@ -95,6 +98,10 @@ def notify_clients_on_panel_change(fd, events):
             print "notify client %s!" % w
             w(data)
         WEB_CLIENTS = []
+        global SOCKET_IO_CONNECTIONS
+        for i in SOCKET_IO_CONNECTIONS:
+            print "notify socketio! %s" % i
+            i(data)
 
 
 # TODO: move animation to another file?
@@ -153,6 +160,31 @@ class PlayAnimationThread(threading.Thread):
             time.sleep(float(frame[1]))
 
 
+class SocketIOUpdaterConnection(SocketConnection):
+    def on_message(self, msg):
+        print "web_server: socket.io => got message! why? from who?", msg
+
+    def send_panel_data(self, data):
+        self.emit('dl_panel_data', data)
+
+    @event
+    def panel_press(self, x, y, c):
+        # print "socket_io: pressed at", x, y, c
+        packet = DL_COMMUNICATOR.encode_partial_frame(x, y, c)
+        DL_COMMUNICATOR.send(packet)
+
+    def on_open(self, msg):
+        print "web_server: socketio opened", msg
+        global SOCKET_IO_CONNECTIONS
+        SOCKET_IO_CONNECTIONS.append(self.send_panel_data)
+
+    def on_close(self):
+        print "web_server: socketio closed"
+        global SOCKET_IO_CONNECTIONS
+        SOCKET_IO_CONNECTIONS.remove(self.send_panel_data)
+
+
+# TODO: refactor to a separate animation loader/saver (needed for idle player)
 def save_animation_to_db(key, val):
     prefix = 'dl_'
     json = tornado.escape.json_encode(val)
@@ -164,10 +196,10 @@ def load_animation_from_db(key):
     prefix = 'dl_'
     r = redis.Redis()
     return tornado.escape.json_decode(r.get(prefix+key))
-    
+
 
 def get_all_animations():
-    r = redis.Redis()    
+    r = redis.Redis()
     prefix = 'dl_'
     anims = []
     for k in r.keys(prefix+'*'):
@@ -176,19 +208,8 @@ def get_all_animations():
     return anims
 
 
-
-class SocketIOUpdaterConnection(SocketConnection):
-    def on_message(self, msg):
-        print "socket.io => got message!", msg
-    
-    def on_open(self, msg):
-        pass
-    
-    def on_close(self, msg):
-        pass
-
 SocketIORouter = TornadioRouter(SocketIOUpdaterConnection)
-    
+
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
     'debug': True,
@@ -196,16 +217,17 @@ settings = {
 }
 
 application = tornado.web.Application([
-    (r"/",                  LiveHandler),
-    (r"/animate/",          AnimateHandler),
-    (r"/text/",             TextHandler),
+    (r"/",                      LiveHandler),
+    (r"/animate/",              AnimateHandler),
+    (r"/text/",                 TextHandler),
     
-    (r"/a/message",         PlayMessageHandler),
-    (r"/a/press",           PanelPressedHandler),
-    (r"/a/update",          PanelUpdateHandler),
-    (r"/a/save-animation",  SaveAnimationHandler),    
-    (r"/a/play-animation",  PlayAnimationHandler),    
-] + SocketIORouter.urls, **settings)
+    (r"/a/message",             PlayMessageHandler),
+    (r"/a/press",               PanelPressedHandler),
+    (r"/a/update",              PanelUpdateHandler),
+    (r"/a/save-animation",      SaveAnimationHandler),
+    (r"/a/play-animation",      PlayAnimationHandler),
+] + SocketIORouter.urls,
+    **settings)
 
 if __name__ == "__main__":
     application.listen(8888)

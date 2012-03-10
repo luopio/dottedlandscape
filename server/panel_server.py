@@ -1,23 +1,22 @@
-import time, sys
+import  sys
 import gevent
 from gevent import socket
 
-from blip_receiver import DottedLandscapeCommunicator
+from dl.communicator import DottedLandscapeCommunicator
 
 # TODO: maybe separate to DottedLandscapePainter which would handle the 
 # logic of drawing on the panel and fading out etc., animations, etc.
 
 class DottedLandscapeServer(DottedLandscapeCommunicator):
-    # panel_width = 8
-    # panel_height = 8
-    # channels = 3
-    
-    def __init__(self):
+
+    def __init__(self, additive_coloring=False, fade_out=False):
         self.host = None # Symbolic name meaning all available interfaces
         self.port = 2323
         self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.receive_socket = None
         self.receivers = []
+        self.additive_coloring = additive_coloring
+        self.fade_out = fade_out
         self.__panel_data = None
         super(DottedLandscapeServer, self).__init__(self.prepare_panel)
         # self.define_panel(self.panel_width, self.panel_height, self.channels)
@@ -25,23 +24,21 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     
     def plot(self, x, y, color):
         p = (x % self.panel_width + y * self.panel_width) * 3
-        
-        
-        #    self.__panel_data[p]     = max(0, min(self.__panel_data[p]     + color[0], 255))
-        #    self.__panel_data[p + 1] = max(0, min(self.__panel_data[p + 1] + color[1], 255))
-        #    self.__panel_data[p + 2] = max(0, min(self.__panel_data[p + 2] + color[2], 255))
+        if self.additive_coloring:
+            self.__panel_data[p]     = max(0, min(self.__panel_data[p]     + color[0], 255))
+            self.__panel_data[p + 1] = max(0, min(self.__panel_data[p + 1] + color[1], 255))
+            self.__panel_data[p + 2] = max(0, min(self.__panel_data[p + 2] + color[2], 255))
         # otherwise, including with 0, 0, 0, we do absolute colors
-        #else:
-        self.__panel_data[p]     = color[0]
-        self.__panel_data[p + 1] = color[1]
-        self.__panel_data[p + 2] = color[2]
+        else:
+            self.__panel_data[p]     = color[0]
+            self.__panel_data[p + 1] = color[1]
+            self.__panel_data[p + 2] = color[2]
         self.__panel_changed = True
     
     
     def prepare_panel(self, w, h, c):
-        # self.panel_width, self.panel_height, self.channels = w, h, c
         print "dl_server: prepare panel %sx%s:%s" % (w, h, c)
-        self.__panel_data = [0 for i in xrange(self.panel_width * self.panel_height * self.channels)]
+        self.__panel_data = [0 for _ in xrange(self.panel_width * self.panel_height * self.channels)]
 
     
     def plot_all(self, color):
@@ -106,7 +103,7 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     def notify_receivers(self):
         packet = self.encode_full_frame(self.__panel_data)
         for ip, port in self.receivers:
-            print "notify receiver at", ip, port
+            # print "notify receiver at", ip, port
             self.send_socket.sendto(packet, 0, (ip, port))
     
     
@@ -114,7 +111,9 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
         print "start"
         self.keep_on_doing_it = True
         self.listen_all()
-        gevent.spawn(self.panel_fadeout)
+        if self.fade_out:
+            print "dl_server: activating fadeout"
+            gevent.spawn(self.panel_fadeout)
         print "dl_server: entering main loop"
         while self.keep_on_doing_it:
             data = self.receive_socket.recv(0xfff)
@@ -134,20 +133,21 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
                     self.prepare_panel(header[2], header[1], header[3])
                 self.plot_full(payload)
                 self.notify_receivers()
-            #print "header", header
-            #print "payload", payload
-            # self.panel_fadeout()
             gevent.sleep()
     
     
     def panel_fadeout(self):
         while self.keep_on_doing_it:
             i = 0
-            if self.__panel_data:
-                for v in self.__panel_data:
-                    # self.__panel_data[i] *= 0.7
-                    i += 1
-            gevent.sleep(3)
+            if self.__panel_data and sum(self.__panel_data):
+                for i, v in enumerate(self.__panel_data):
+                    if self.__panel_data[i] > 20:
+                        self.__panel_data[i] *= 0.9
+                        # self.__panel_data[i] -= 20
+                    else:
+                        self.__panel_data[i] = 0
+                self.notify_receivers()
+            gevent.sleep(0.1)
     
     
     def get_panel_data(self):
@@ -181,7 +181,7 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
 
 
 if __name__ == '__main__':
-    dls = DottedLandscapeServer()
+    dls = DottedLandscapeServer(fade_out=True, additive_coloring=True)
     dls.start()
     # dls.send_test_packet('127.0.0.1', 2324)
     

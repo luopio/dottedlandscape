@@ -6,6 +6,7 @@
 var panelInteraction = {
     mouseButtonDown: false,
     activeColor: [255, 0, 0],
+    useSocketIO: true,
     
     // optional init parameter that get's called everytime a cell is painted
     changeCallback: null,
@@ -59,7 +60,7 @@ var panelInteraction = {
                     // alert('deltas: ' + cellLeftEdgeDelta + ", " + cellTopEdgeDelta+' w/h ' + cellWidth + ", " + cellHeight);
                     //if (cellLeftEdgeDelta > cellWidth * 0.1 && cellLeftEdgeDelta < cellWidth * 0.9) {
                     //    if (cellTopEdgeDelta > cellHeight * 0.1 && cellTopEdgeDelta < cellHeight * 0.9) {
-                            panelInteraction.cellPressedAt(col, row);
+                            panelInteraction.cellPressedAt(col, row, e.target);
                     //    }
                     //}
                     
@@ -77,23 +78,41 @@ var panelInteraction = {
         if(panelInteraction.mouseButtonDown) {
             var x = $(this).data('x');
             var y = $(this).data('y');
-            panelInteraction.cellPressedAt(x, y);
+            panelInteraction.cellPressedAt(x, y, e.target);
         }
     },
-    
-    cellPressedAt: function(x, y) {
+
+    rgbRegexp: /rgb\(([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
+    cellPressedAt: function(x, y, el) {
         if(panelInteraction.mouseButtonDown) {
-            if(!panelInteraction.justLocal) {
-                $.post('/a/press', {'x': x, 'y': y, 
-                        'c': panelInteraction.activeColor}, 
-                    function(data) {
-                        // $('footer').text("OK");
-                        // log('server said:' + data)    
+            console.log(el);
+            var color = $(el).css('background-color');
+            var m = panelInteraction.rgbRegexp.exec(color);
+            var r = parseInt(m[1]);
+            var g = parseInt(m[2]);
+            var b = parseInt(m[3]);
+            if( r != panelInteraction.activeColor[0] ||
+                g != panelInteraction.activeColor[1] ||
+                b != panelInteraction.activeColor[2]) {
+
+                if(!panelInteraction.justLocal) {
+                    if( panelInteraction.useSocketIO ) {
+                        socketIOPanelUpdater.socket.emit('panel_press', {'x': x, 'y': y,
+                            'c': panelInteraction.activeColor} );
+                    } else {
+                        $.post('/a/press', {'x': x, 'y': y,
+                                'c': panelInteraction.activeColor},
+                            function(data) {
+                                // $('footer').text("OK");
+                                // log('server said:' + data)
+                            }
+                        );
                     }
-                );
-            }
-            if(panelInteraction.changeCallback) {
-                panelInteraction.changeCallback(x, y, panelInteraction.activeColor);
+
+                }
+                if(panelInteraction.changeCallback) {
+                    panelInteraction.changeCallback(x, y, panelInteraction.activeColor);
+                }
             }
         }
     },
@@ -104,7 +123,7 @@ var panelInteraction = {
         var x = $el.data('x');
         var y = $el.data('y');
         if($.isNumeric(x) && $.isNumeric(y)) {
-            panelInteraction.cellPressedAt(x, y); 
+            panelInteraction.cellPressedAt(x, y, $el);
         }
     },
     
@@ -173,4 +192,28 @@ var panelUpdater = {
         log("Poll error; sleeping for", panelUpdater.errorSleepTime, "ms");
         window.setTimeout(panelUpdater.poll, panelUpdater.errorSleepTime);
     },
+};
+
+
+var socketIOPanelUpdater = {
+    socket: null,
+    previousDataPacket: null,
+
+    init: function() {
+        socketIOPanelUpdater.socket = io.connect('/');
+        socketIOPanelUpdater.socket.on('dl_panel_data', socketIOPanelUpdater.onSuccess);
+    },
+
+    onSuccess: function(data) {
+        if(data != socketIOPanelUpdater.previousDataPacket) {
+            var counter = 0;
+            $('#panel td').each(function (e) {
+                $(this).css('background-color', 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
+                // $(this).text(counter);
+                counter += 3;
+            });
+            socketIOPanelUpdater.previousDataPacket = data;
+        }
+    }
+
 };

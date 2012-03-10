@@ -1,7 +1,7 @@
 #!/bin/python
 import serial, struct, time
 
-from blip_receiver import DottedLandscapeCommunicator
+from server.dl.communicator import DottedLandscapeCommunicator
 
 class SerialConnection(object):
     ser = None
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     
 
     done = False 
-    while done == False:
+    while not done:
         # get any incoming data from the DL server
         data = dlc.check_for_data()
         if data:     # new frame received!

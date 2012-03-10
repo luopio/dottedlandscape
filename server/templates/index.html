@@ -70,8 +70,9 @@
         // input
         panelInteraction.init();
         // output
-        panelUpdater.init();
-        
+        // panelUpdater.init();
+        socketIOPanelUpdater.init();
+
         $('#saved-animations div').click(function(e) {
             e.preventDefault(); 
             var t = $(this).attr('animation-title');
