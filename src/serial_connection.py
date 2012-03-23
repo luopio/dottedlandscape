@@ -1,7 +1,7 @@
 #!/bin/python
 import serial, struct, time
 
-from server.dl.communicator import DottedLandscapeCommunicator
+from dl.communicator import DottedLandscapeCommunicator
 
 class SerialConnection(object):
     ser = None
@@ -11,9 +11,11 @@ class SerialConnection(object):
         self.full_frame_struct = struct.Struct('<B' + 'B' * 8 * 3) # one byte per row, per channel 
     
     def connect(self):
-        # ttyACM0
-        self.ser = serial.Serial('/dev/ttyACM0', 19200)
-        
+        try:
+            # ttyACM0
+            self.ser = serial.Serial('/dev/ttyACM0', 19200)
+        except:
+            self.ser = serial.Serial('/dev/ttyACM1', 19200)
         # self.ser.setTimeout(0.8)
         # line = self.ser.read(58)
         # print "msg >", line
@@ -78,7 +80,8 @@ if __name__ == '__main__':
             print "sent %s of data" % len(frame)
             sc.write(frame)
         else:
-            time.sleep(0.5)
+            # time.sleep(0.5)
+            pass
                 
     
     dlc.disconnect()

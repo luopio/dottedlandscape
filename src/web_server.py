@@ -10,6 +10,8 @@ from tornadio2 import SocketConnection, TornadioRouter, event
 
 from dl.communicator import DottedLandscapeCommunicator
 from dl.text_writer import TextWriter
+from dl.analytics import Analytics
+from dl.animationstorage import AnimationStorage
 
 TEXT_WRITER = TextWriter()
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
@@ -18,11 +20,19 @@ DL_COMMUNICATOR = DottedLandscapeCommunicator()
 DL_COMMUNICATOR.define_panel(8, 8, 3)
 WEB_CLIENTS = []
 SOCKET_IO_CONNECTIONS = []
+ANALYTICS = Analytics()
+ANIMATIONSTORAGE = AnimationStorage()
 
-# Static handlers
+# Helper functions
+def create_user_fingerprint(req):
+    pass
+
+
+# Template handlers
 class LiveHandler(tornado.web.RequestHandler):
     def get(self):
-        anims = get_all_animations()
+        global ANIMATIONSTORAGE
+        anims = ANIMATIONSTORAGE.get_all_animations()
         self.render("templates/index.html", saved_animations=anims)
 class AnimateHandler(tornado.web.RequestHandler):
     def get(self):
@@ -35,11 +45,13 @@ class TextHandler(tornado.web.RequestHandler):
 class PlayMessageHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
-        message = args['message'][0]        
+        message = args['message'][0]
         color = args['color[]']
-        
+
         print "MESSAGE COLOR:", color
-        
+        user_data = create_user_fingerprint(self.request)
+        # ANALYTICS.text_messaged({'msg': message, 'color': c}, user_data)
+
         if message and len(message) < 100:
             print "PLAY MESSAGE", message
             frames = TEXT_WRITER.get_all_frames(message, color)
@@ -59,9 +71,11 @@ class PanelPressedHandler(tornado.web.RequestHandler):
         x = int(args['x'][0])
         y = int(args['y'][0])
         c = args['c[]']
-        #print "pressed at", x, y, 
-        #print "color", args['c[]'][0]
+
         print "panel_pressed", x, y, c
+        user_data = create_user_fingerprint(self.request)
+        ANALYTICS.live_drawed({'x': x, 'y': y, 'c': color}, user_data)
+
         packet = DL_COMMUNICATOR.encode_partial_frame(x, y, c)
         DL_COMMUNICATOR.send(packet)
         self.set_header("Content-Type", "application/json")
@@ -104,7 +118,7 @@ def notify_clients_on_panel_change(fd, events):
             i(data)
 
 
-# TODO: move animation to another file?
+# TODO: move animation functionality and thread to another file?
 class SaveAnimationHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
@@ -132,7 +146,8 @@ class SaveAnimationHandler(tornado.web.RequestHandler):
                                 'title': name, 'author': author,
                                 'frames': frames}
         print "animation save: ", name, author
-        save_animation_to_db(name, frame_save_structure)
+        global ANIMATIONSTORAGE
+        ANIMATIONSTORAGE.save_animation_to_db(name, frame_save_structure)
         self.set_header("Content-Type", "application/json")
         json = tornado.escape.json_encode({'status': 'ok', 'name': name})
         self.write(json)
@@ -142,7 +157,8 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
     def get(self):
         args = self.request.arguments
         name = args['title'][0]
-        a = load_animation_from_db(name)
+        global ANIMATIONSTORAGE
+        a = ANIMATIONSTORAGE.load_animation_from_db(name)
         if a:
             pt = PlayAnimationThread()
             pt.frames = a['frames']
@@ -175,37 +191,15 @@ class SocketIOUpdaterConnection(SocketConnection):
 
     def on_open(self, msg):
         print "web_server: socketio opened", msg
-        global SOCKET_IO_CONNECTIONS
+        global SOCKET_IO_CONNECTIONS, ANALYTICS
         SOCKET_IO_CONNECTIONS.append(self.send_panel_data)
+        # user_data = create_user_fingerprint(self.request)
+        # ANALYTICS.user_connected(user_data)
 
     def on_close(self):
         print "web_server: socketio closed"
         global SOCKET_IO_CONNECTIONS
         SOCKET_IO_CONNECTIONS.remove(self.send_panel_data)
-
-
-# TODO: refactor to a separate animation loader/saver (needed for idle player)
-def save_animation_to_db(key, val):
-    prefix = 'dl_'
-    json = tornado.escape.json_encode(val)
-    r = redis.Redis()
-    r.set(prefix+key, json)
-
-
-def load_animation_from_db(key):
-    prefix = 'dl_'
-    r = redis.Redis()
-    return tornado.escape.json_decode(r.get(prefix+key))
-
-
-def get_all_animations():
-    r = redis.Redis()
-    prefix = 'dl_'
-    anims = []
-    for k in r.keys(prefix+'*'):
-        j = tornado.escape.json_decode(r.get(k))
-        anims.append((j['title'], j['author'], j['frames'][0]))
-    return anims
 
 
 SocketIORouter = TornadioRouter(SocketIOUpdaterConnection)
