@@ -34,6 +34,9 @@ class LiveHandler(tornado.web.RequestHandler):
         global ANIMATIONSTORAGE
         anims = ANIMATIONSTORAGE.get_all_animations()
         self.render("templates/index.html", saved_animations=anims)
+class DrawHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("templates/draw.html")
 class AnimateHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/animate.html")
@@ -55,8 +58,7 @@ class PlayMessageHandler(tornado.web.RequestHandler):
         if message and len(message) < 100:
             print "PLAY MESSAGE", message
             frames = TEXT_WRITER.get_all_frames(message, color)
-            pt = PlayAnimationThread()
-            pt.frames = frames
+            pt = PlayAnimationThread(frames)
             pt.start()
             self.set_header("Content-Type", "application/json")
             self.write('ok')
@@ -160,20 +162,22 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
         global ANIMATIONSTORAGE
         a = ANIMATIONSTORAGE.load_animation_from_db(name)
         if a:
-            pt = PlayAnimationThread()
-            pt.frames = a['frames']
+            pt = PlayAnimationThread(a['frames'])
             pt.start()
             
 
 class PlayAnimationThread(threading.Thread):
-    frames = []
+    def __init__(self, frames):
+        self.frames = frames
+        super(PlayAnimationThread, self).__init__()
 
     def run(self):
+        print "PlayAnimationThread: playing animation with %s frames." % len(self.frames)
         for frame in self.frames:
-            print "PLAY FRAME THREAD WITH LEN %s " % len(frame[0])
             p = DL_COMMUNICATOR.encode_full_frame(frame[0])
             DL_COMMUNICATOR.send(p)
             time.sleep(float(frame[1]))
+        print "PlayAnimationThread: animation done."
 
 
 class SocketIOUpdaterConnection(SocketConnection):
@@ -185,7 +189,6 @@ class SocketIOUpdaterConnection(SocketConnection):
 
     @event
     def panel_press(self, x, y, c):
-        # print "socket_io: pressed at", x, y, c
         packet = DL_COMMUNICATOR.encode_partial_frame(x, y, c)
         DL_COMMUNICATOR.send(packet)
 
@@ -212,6 +215,7 @@ settings = {
 
 application = tornado.web.Application([
     (r"/",                      LiveHandler),
+    (r"/draw/",                 DrawHandler),
     (r"/animate/",              AnimateHandler),
     (r"/text/",                 TextHandler),
     

@@ -1,88 +1,58 @@
-{% extends "base.html" %}
-
-{% block body_id %}text{% end %}
-
-{% block content %}
-
-<div id="links">
-    <a href="/" class="button"><span>&#9664;</span> Paint</a>
-    <a href="/animate/" class="button">Animate <span>&#9654;</span></a>
+<div data-role="header">
+    <h1>Dotted Landscape</h1>
+    <div data-role="navbar">
+        <ul>
+            <li>
+                <a href="#draw">Draw</a>
+            </li>
+            <li>
+                <a href="#animate">Animate</a>
+            </li>
+            <li>
+                <a href="#text" class="ui-btn-active">Text</a>
+            </li>
+        </ul>
+    </div>
 </div>
 
-<div id="color" class="color-selection">
-    <!-- 
-     <div style="background:rgb(255, 255, 0);"></div>
-    <div style="background:rgb(255, 255, 255);"></div>
-    <div style="background:rgb(0, 255, 255);"></div>
-    -->
-    <div class="active" style="background:rgb(255, 0, 0);"></div>
-    <div style="background:rgb(255, 255, 0);"></div>
-    <div style="background:rgb(0, 255, 255);"></div>
-    <div style="background:rgb(255, 0, 255);"></div>
-    <div style="background:rgb(255, 255, 255);"></div>
-    <div style="background:rgb(0, 255, 0);"></div>
-    <div style="background:rgb(0, 0, 255);"></div>
-    <div style="background:rgb(0, 0, 0);"></div>
-</div>
+<div data-role="content">
 
-<div id="message-sending">
-    <form action="" method="">
-        <input type="text" name="message" id="message" />
-        <input type="button" value="send" id="send-button" />
-    </form>
-</div>
+    <div id="color" class="color-selection">
+        <!--
+         <div style="background:rgb(255, 255, 0);"></div>
+        <div style="background:rgb(255, 255, 255);"></div>
+        <div style="background:rgb(0, 255, 255);"></div>
+        -->
+        <div class="active" style="background:rgb(255, 0, 0);"></div>
+        <div style="background:rgb(255, 255, 0);"></div>
+        <div style="background:rgb(0, 255, 255);"></div>
+        <div style="background:rgb(255, 0, 255);"></div>
+        <div style="background:rgb(255, 255, 255);"></div>
+        <div style="background:rgb(0, 255, 0);"></div>
+        <div style="background:rgb(0, 0, 255);"></div>
+        <div style="background:rgb(0, 0, 0);"></div>
+    </div>
 
-<div id="small-panel-container">
-    <table id="panel" class="smaller-live-panel">
-        <thead></thead>
-        <tfoot></tfoot>
-        <tbody>
-            {% for y in range(0, 8) %}
-            <tr>
-                {% for x in range(0, 8) %}
-                <td data-x="{{x}}" data-y="{{y}}"></td>
+    <div id="message-sending">
+        <form action="" method="">
+            <input type="text" name="message" id="message" />
+            <input type="button" value="send" id="send-button" />
+        </form>
+    </div>
+
+    <div id="small-panel-container">
+        <table id="text-panel" class="smaller-live-panel">
+            <thead></thead>
+            <tfoot></tfoot>
+            <tbody>
+                {% for y in range(0, 8) %}
+                <tr>
+                    {% for x in range(0, 8) %}
+                    <td data-x="{{x}}" data-y="{{y}}"></td>
+                    {% end %}
+                </tr>
                 {% end %}
-            </tr>
-            {% end %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
-
-{% end %}
-
-
-{% block scripts %}
-<script type="text/javascript">
-    $(function() {
-        // no input
-        // panelInteraction.init();
-        
-        // output
-        var ACTIVE_COLOR = [255, 0, 0];
-        
-        $('div.color-selection div').click(function(e) {
-            $(this).parent().find('div').removeClass('active');
-            $(this).addClass('active');
-            var s = $(this).css('background-color');
-            s = s.replace(' ', '');
-            s = s.split('(')[1].split(')')[0];
-            var colors = s.split(',');
-            ACTIVE_COLOR = [parseInt(colors[0]), parseInt(colors[1]), parseInt(colors[2])];
-            console.log(ACTIVE_COLOR)
-        })
-        
-        panelUpdater.init();
-        $('#send-button').click(function(e) {
-            var txt = $('#message').val();
-            if(txt) {
-                if(txt.length > 100) {
-                    alert('Please keep the message length to under 100 characters. Thanks.');
-                    return;
-                }
-                $.post('/a/message', {message: txt, color: ACTIVE_COLOR});    
-            }
-        })
-      
-    });
-</script>
-{% end %}

@@ -5,12 +5,16 @@ var animation = {
     curPlayingFrameIndex: 0,
     animationSpeed: 500,
     selectedFrame: null,
+    panelElement: null,
     
     init: function() {
-        $('div#add-frame').click(animation.addFrame);
-        $('div#delete-frame').click(animation.removeFrame);
-        $('div#move-frame-forward').click(animation.moveFrameForward);
-        $('div#move-frame-backward').click(animation.moveFrameBackward);
+        $('#add-frame').click(animation.addFrame);
+        $('#delete-frame').click(animation.removeFrame);
+        $('#move-frame-forward').click(animation.moveFrameForward);
+        $('#move-frame-backward').click(animation.moveFrameBackward);
+        $('#play-button').click(animation.play);
+        $('#upload-button').click(animation.upload);
+        animation.panelElement = $('#animate-panel');
     },
     
     play: function() {
@@ -36,8 +40,9 @@ var animation = {
         if(e)
             e.preventDefault();
             
-        var frameLength = $('#slider').slider('value');
-        var $thumb = $('#panel').clone();
+        var frameLength = $('#frame-length').find('input:checked').val();
+        log('frame of len ' + frameLength)
+        var $thumb = $('#animate-panel').clone();
         $thumb.attr('id', '').data('duration', frameLength);
         $thumb.find('td').data('x', '').data('y', '');
         $thumb.css('display', 'inline-block');
@@ -60,7 +65,7 @@ var animation = {
     
     setPanelData: function(frameData) {
         var counter = 0;
-        $('#panel td').each(function (e) { 
+        animation.panelElement.find('td').each(function (e) { 
             $(this).css('background-color', 
                 'rgb('+frameData.data[counter]+','+frameData.data[counter+1]+','+frameData.data[counter+2]+')');
             counter += 3;
@@ -104,8 +109,9 @@ var animation = {
     /*  Changes to the big panel are done here. We get the chance to directly update the small panels
         as well if needed */
     panelChangedCallback: function(x, y, c) {
+        log('panel changed')
         var i = parseInt(x) + parseInt(y) * 8;
-        $($('#panel td')[i]).css('background-color', 'rgb('+c[0]+','+c[1]+','+c[2]+')');
+        $($('#animate-panel td')[i]).css('background-color', 'rgb('+c[0]+','+c[1]+','+c[2]+')');
         if(animation.selectedFrame !== null) {
             var selectedFrameTable = $('div#frames table').get(animation.selectedFrame);
             var affectedPixel = $(selectedFrameTable).find('td').get(i);

@@ -12,7 +12,8 @@ class DottedLandscapeCommunicator(object):
     blip_MAGIC_MCU_FRAME = 0x23542666
     dl_MAGIC_NEW_CONNECTION = 0x11AEEE
     dl_MAGIC_FRAME_PARTIAL = 0x114545 # partial frame with just changed dots
-    dl_MAGIC_FRAME_FULL = 0x119898 # full frame received
+    # dl_MAGIC_FRAME_FULL = 0x119898 # full frame received
+    dl_MAGIC_FRAME_FULL = 0x23542666
     
     def __init__(self, panel_changed_callback=None):
         self.header_struct = struct.Struct('!IHHHH') 

@@ -17,6 +17,7 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
         self.receivers = []
         self.additive_coloring = additive_coloring
         self.fade_out = fade_out
+        self.__fade_out_counters = None
         self.__panel_data = None
         super(DottedLandscapeServer, self).__init__(self.prepare_panel)
         # self.define_panel(self.panel_width, self.panel_height, self.channels)
@@ -39,32 +40,27 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     def prepare_panel(self, w, h, c):
         print "dl_server: prepare panel %sx%s:%s" % (w, h, c)
         self.__panel_data = [0 for _ in xrange(self.panel_width * self.panel_height * self.channels)]
+        self.__fade_out_counters = [0 for _ in xrange(self.panel_width * self.panel_height)]
 
-    
-    def plot_all(self, color):
-        i = 0
-        while i < len(self.__panel_data):
-            self.__panel_data[i]        = max(0, min(self.__panel_data[i]     + color[0], 255))
-            self.__panel_data[i + 1]    = max(0, min(self.__panel_data[i + 1] + color[1], 255))
-            c = max(0, min(self.__panel_data[i + 2] + color[2], 255))
-            self.__panel_data[i + 2]    = c
-            i += 3
-        self.__panel_changed = True
-    
     
     def plot_partial(self, data):
         x, y, r, g, b = data
+        self.__fade_out_counters[x + y * self.panel_width] = 15
         self.plot(x, y, (r, g, b))
         
 
     def plot_full(self, data):
         i = 0
-        for v in data:
-            # self.__panel_data[i] = max(0, min(self.__panel_data[i] + v, 255))
-            # absolute coloring
-            self.__panel_data[i] = v
-            i += 1
-
+        while i < len(data):
+            # absolute coloring, except for blacks
+            if data[i] + data[i + 1] + data[i + 2] > 0:
+                self.__panel_data[i] = data[i]
+                self.__panel_data[i + 1] = data[i + 1]
+                self.__panel_data[i + 2] = data[i + 2]
+                self.__fade_out_counters[int(i / 3)] = 15
+            i += 3
+        self.__panel_changed = True
+    
 
     def listen_all(self):
         for res in socket.getaddrinfo(self.host, self.port, 
@@ -111,9 +107,12 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
         print "start"
         self.keep_on_doing_it = True
         self.listen_all()
+        
+        # start the fade out routine
         if self.fade_out:
             print "dl_server: activating fadeout"
             gevent.spawn(self.panel_fadeout)
+        
         print "dl_server: entering main loop"
         while self.keep_on_doing_it:
             data = self.receive_socket.recv(0xfff)
@@ -133,20 +132,25 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
                     self.prepare_panel(header[2], header[1], header[3])
                 self.plot_full(payload)
                 self.notify_receivers()
+            
             gevent.sleep()
     
     
     def panel_fadeout(self):
         while self.keep_on_doing_it:
             i = 0
-            if self.__panel_data and sum(self.__panel_data):
-                for i, v in enumerate(self.__panel_data):
-                    if self.__panel_data[i] > 20:
-                        self.__panel_data[i] *= 0.9
-                        # self.__panel_data[i] -= 20
-                    else:
-                        self.__panel_data[i] = 0
-                self.notify_receivers()
+            at_least_one_has_gone_dark = False
+            if self.__fade_out_counters and sum(self.__fade_out_counters):
+                for i, v in enumerate(self.__fade_out_counters):
+                    if self.__fade_out_counters[i] > 0:
+                        self.__fade_out_counters[i] -= 1
+                        if self.__fade_out_counters[i] == 0:
+                            self.__panel_data[i * 3 + 0] = 0
+                            self.__panel_data[i * 3 + 1] = 0
+                            self.__panel_data[i * 3 + 2] = 0
+                            at_least_one_has_gone_dark = True
+                if at_least_one_has_gone_dark:
+                    self.notify_receivers()
             gevent.sleep(0.1)
     
     

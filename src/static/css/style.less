@@ -1,8 +1,3 @@
-/**
- * HTML5 ✰ Boilerplate
- * Taken from Paul Irish boilerplate. See comments in original for due credit
- */
-
 html, body, div, span, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 abbr, address, cite, code, del, dfn, em, img, ins, kbd, q, samp,
@@ -86,91 +81,17 @@ a:hover { color: #036; }
  * Author: Lauri Kainulainen 
  */
 
-body#animate {
-    background: #888;
-    color: #f2f2f2;
+h1 {
+    text-transform: uppercase;
 }
-
-body#live {
-    background: #111;
-    color: #f2f2f2;
-}
-
-body#text {
-    background: #777;
-    color: #000;
-}
-
-header, div#main, footer {
-    padding: 0;
-}
-
-header, footer {
-    text-align: center;
-}
-
-footer {
-    font-size: 0.8em;
-    width: 100%;
-    margin: 4em auto;
-}
-
 h2 {
     text-transform: uppercase;
-    font-weight: normal;
-    margin: 2em 0 1em 0;
 }
-
-div#content {
-    margin: auto;
-}
-
-/* Content block wrapper */
-div#main {
-    margin: auto;
-}
-div#main div {
-    margin: auto;
-    text-align: center;
-}
-
-div#main div#links {
-    margin: 0 auto 1.5em auto;
-    
-}
-div#main div#links a {
-    min-width: 8em;
-}
-
-div#main div#links a span{
-    position: relative;
-    top: -2px;
-}
-
-
-div#main div#upload {
-    margin: 2em 0;
-}
-div#upload h3 {
-    border-top: 1px dotted #e2e2e2;    
-}
-
-div#upload label {
-    display: block;
-    width: 100%;
-    text-align: center;
-    padding-bottom: 4px;
+h3 {
     text-transform: uppercase;
-    font-size: 0.8em;
 }
-
-div#upload input {
-    margin-bottom: 1em;
-}
-
-
-table#panel {
-    /*width: 100%;*/
+cc
+table.panel {
     margin: auto;
 }
 
@@ -178,22 +99,7 @@ div#main div#message-sending {
     width: 100%;
 }
 
-form {
-    text-align: center;
-}
-
-form input {
-    font-size: 1.8em;
-    padding: 8px;
-    margin: 0.5em 0;
-}
-
-form input[type=button] {
-    text-transform: uppercase;
-    margin: 2em auto;
-}
-
-#panel td {
+.panel td {
     width: 1cm; /* 12.5% */
     height: 1cm; /*40px;*/
     text-align: center;
@@ -204,15 +110,17 @@ form input[type=button] {
     -webkit-user-select: none;
 }
 
-#panel.smaller-live-panel td {
-    width: 0.2cm; /* 12.5% */
-    height: 0.2cm; /*40px;*/
-    text-align: center;
-    vertical-align: middle;
-    background: #000;
-    border: 1px dotted #777;
-    -moz-user-select: none;
-    -webkit-user-select: none;
+.smaller-live-panel {
+    td {
+        width: 0.2cm; /* 12.5% */
+        height: 0.2cm; /*40px;*/
+        text-align: center;
+        vertical-align: middle;
+        background: #000;
+        border: 1px dotted #777;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+    }
 }
 
 div#saved-animations {
@@ -220,81 +128,60 @@ div#saved-animations {
     text-align: center;
     max-width: 35em;
     overflow: hidden;
+
+    div {
+        margin: 3% 3% 3% 0;
+        font-size: 0.9em;
+        text-align: center;
+        width: 41%;
+        height: 10em;
+        overflow: hidden;
+        float: left;
+        cursor: pointer;
+        padding: 8px 4px;
+        border: 1px solid transparent;
+
+        &:hover {
+            border: 1px solid #777;
+        }
+    }
+    span {
+        display: inline-block;
+        height: 45px;
+        overflow: hidden;
+    }
+    table {
+        margin: auto;
+        td {
+            width: 10px;
+            height: 10px;
+            border: 1px solid #333;
+        }
+    }
 }
 
-div#saved-animations div {
-    margin: 3% 3% 3% 0;
-    font-size: 0.9em;
-    text-align: center;
-    width: 41%;
-    height: 10em;
-    overflow: hidden;
-    float: left;
-    cursor: pointer;
-    padding: 8px 4px;
-    border: 1px solid transparent;
-}
 
-div#saved-animations div:hover {
-    border: 1px solid #777;
-}
-
-div#saved-animations span {
-    display: inline-block;
-    height: 45px;
-    overflow: hidden;
-}
-
-div#saved-animations table {
-    margin: auto;
-}
-
-div#saved-animations td {
-    width: 10px;
-    height: 10px;
-    border: 1px solid #333;
-}
-
-/* Contains the slider for the length of the frame */
-div#main div#frame-options {
-    width: 100%;
-    min-height: 2em;
-    margin: 1em 0 2em 0;
-}
-div#main div#frame-options div#slider{
-    margin: auto;
-}
-div#main div#frame-options div#frame-move-controls {
-    margin: 1em auto;
-    text-align: center;
-    display: none;
-}
-div#main div#frame-options div#frame-move-controls div {
-    display: inline-block;
-    font-size: 1.4em;
-    line-height: 1.4em;
-    margin: 0 1em;
-    padding: 0 1em;
-}
-
-div#main div#frames {
+div#frames {
     margin: 0.5em 0;
     overflow: hidden;
+    table {
+        padding: 0;
+        margin: 0 0.6em 0.6em 0em;
+        border: 1px solid black;
+        float: left;
+        td {
+            background: black;
+            border: 0px solid #333;
+            width: 0.2cm; /* 12.5% */
+            height: 0.2cm; /*40px;*/
+            border: 1px dotted #777;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+        }
+    }
 }
-
-div#main div#frames table {
-    padding: 0;
-    margin: 0 0.6em 0.6em 0em;
-    border: 1px solid black;
-    float: left;
-}
-
-div#main div#frames td {
-    background: black;
-    border: 0px solid #333;
-}
-
-div#main div#add-frame {
+/*
+div#add-frame {
     margin: 0;
     width: 40px;
     height: 40px;
@@ -302,42 +189,19 @@ div#main div#add-frame {
     color: #111;
     display: inline-block;
     float: left;
-}
 
-div#main div#add-frame a {
-    font-size: 3.5em;
-    position: relative;
-    top: -10px;
-    text-decoration: none;
+    a {
+        font-size: 3.5em;
+        position: relative;
+        top: -10px;
+        text-decoration: none;
+    }
 }
+*/
 
-div#main div#small-frames-container {
+div#small-frames-container {
     width: 100%;
     text-align: center;
-}
-
-a.button {
-    display: inline-block;
-    padding: 4px 8px;
-    margin: 8px;
-    background: #333;
-    color: #ddd;
-    cursor: pointer;
-    text-transform: uppercase;
-    text-decoration: none;
-    line-height: 18px;
-}
-
-a.button:hover {
-    color: #dfdfdf;
-    background: #444;
-}
-
-h3 {
-    text-transform: uppercase;
-    font-weight: normal;
-    font-size: 1.1em;
-    padding: 16px 2px 4px 2px;    
 }
 
 .selected-frame {
@@ -380,24 +244,16 @@ div#main div.color-selection div.active {
     div#main {
         margin: 0 2em;
     }
-    #panel td {
+    .panel td {
         width: 2cm; /* 12.5% */
         height: 2cm; /*40px;*/
     }
-    #panel.smaller-live-panel td, div#main div#frames table td {
+    .smaller-live-panel td, div#main div#frames table td {
         width: 0.3cm; /* 12.5% */
         height: 0.3cm; /*40px;*/
     }
     div#saved-animations div {
         width: 25%;
-    }
-    div#main div#add-frame {
-        width: 2.3cm;
-        height: 2.3cm;
-        font-size: 24px;
-    }
-    #add-frame a {
-        top: -16px;
     }
 
 }
@@ -415,21 +271,21 @@ div#main div.color-selection div.active {
         margin: 2em 0;
         width: 50%;
     }
-    div#main div#frame-options {
+    div#frame-options {
         float: right;
         width: 50%;
     }
     
-    div#main div#saved-animations {
+    div#saved-animations {
         width: 100%;
     }
     
-    table#panel:not(.smaller-live-panel) {
+    table.panel:not(.smaller-live-panel) {
         float: left;
         margin: 2em 0;
     }
     
-    #panel td {
+    .panel td {
         width: 1.5cm; /* 12.5% */
         height: 1.5cm; /*40px;*/
     }
