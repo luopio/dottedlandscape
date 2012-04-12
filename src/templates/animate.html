@@ -1,23 +1,10 @@
 <div data-role="header">
     <h1>Dotted Landscape</h1>
-    <div data-role="navbar">
-        <ul>
-            <li>
-                <a href="#draw">Draw</a>
-            </li>
-            <li>
-                <a href="#animate" class="ui-btn-active">Animate</a>
-            </li>
-            <li>
-                <a href="#text">Text</a>
-            </li>
-        </ul>
-    </div>
 </div>
 
 <div data-role="content">
 
-    <div class="color-selection">
+    <div class="color-selection color-changer">
         <div class="active" style="background:rgb(255, 0, 0);"></div>
         <div style="background:rgb(255, 255, 0);"></div>
         <div style="background:rgb(0, 255, 255);"></div>
@@ -30,9 +17,9 @@
 
     <table id="animate-panel" class="panel">
         <tbody>
-            {% for y in range(0, 8) %}
+            {% for y in range(0, 9) %}
             <tr>
-                {% for x in range(0, 8) %}
+                {% for x in range(0, 12) %}
                 <td data-x="{{x}}" data-y="{{y}}"></td>
                 {% end %}
             </tr>

@@ -1,29 +1,11 @@
 
 <div data-role="header">
-    <h1>Dotted Landscape</h1>
-    <div data-role="navbar">
-        <ul>
-            <li>
-                <a href="#draw" class="ui-btn-active">Draw</a>
-            </li>
-            <li>
-                <a href="#animate">Animate</a>
-            </li>
-            <li>
-                <a href="#text">Text</a>
-            </li>
-        </ul>
-    </div>
+    <h1>Dotted Landscape @ AAVE</h1>
 </div>
 
 <div data-role="content">
 
     <div id="color-selection-draw" class="color-selection">
-        <!---
-         <div style="background:rgb(255, 255, 0);"></div>
-        <div style="background:rgb(255, 255, 255);"></div>
-        <div style="background:rgb(0, 255, 255);"></div>
-        -->
         <div class="active" style="background:rgb(255, 0, 0);"></div>
         <div style="background:rgb(255, 255, 0);"></div>
         <div style="background:rgb(0, 255, 255);"></div>
@@ -31,16 +13,16 @@
         <div style="background:rgb(255, 255, 255);"></div>
         <div style="background:rgb(0, 255, 0);"></div>
         <div style="background:rgb(0, 0, 255);"></div>
-        <div style="background:rgb(0, 0, 0);"></div>
+        <!-- <div style="background:rgb(0, 0, 0);"></div> -->
     </div>
 
     <table id="draw-panel" class="panel">
         <thead></thead>
         <tfoot></tfoot>
         <tbody>
-            {% for y in xrange(0, 8) %}
+            {% for y in xrange(0, 9) %}
             <tr>
-                {% for x in xrange(0, 8) %}
+                {% for x in xrange(0, 12) %}
                 <td data-x="{{x}}" data-y="{{y}}"></td>
                 {% end %}
             </tr>
@@ -57,9 +39,9 @@
                     <thead></thead>
                     <tfoot></tfoot>
                     <tbody>
-                        {% for y in xrange(0, 192, 24) %}
+                        {% for y in xrange(0, 324, 36) %}
                         <tr>
-                            {% for x in xrange(0, 24, 3) %}
+                            {% for x in xrange(0, 36, 3) %}
                             <td style="background-color: rgb({{a[2][0][x + y]}}, {{a[2][0][x + y + 1]}}, {{a[2][0][x + y + 2]}})"></td>
                             {% end %}
                         </tr>

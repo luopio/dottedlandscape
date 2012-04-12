@@ -47,7 +47,7 @@ var panelInteraction = {
         if(panelInteraction.mouseButtonDown) {
             var x = $(this).data('x');
             var y = $(this).data('y');
-            panelInteraction.cellPressedAt(x, y, e.target);
+            panelInteraction.cellPressedAt(x, y, $(this));
         }
     },
 
@@ -70,8 +70,8 @@ var panelInteraction = {
         // $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight)
         if(x < panelInteraction.panelWidth && x > 0) {
             if(y < panelInteraction.panelHeight && y > 0) {
-                var row = Math.floor(y / panelInteraction.panelHeight * 8);
-                var col = Math.floor(x / panelInteraction.panelWidth * 8);
+                var row = Math.floor(y / panelInteraction.panelHeight * 9);
+                var col = Math.floor(x / panelInteraction.panelWidth * 12);
                 //$('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight +
                 //    "col, row="+col+", "+ row +" mousedown? "+panelInteraction.mouseButtonDown);
                 /*
@@ -83,7 +83,7 @@ var panelInteraction = {
                 // alert('deltas: ' + cellLeftEdgeDelta + ", " + cellTopEdgeDelta+' w/h ' + cellWidth + ", " + cellHeight);
                 //if (cellLeftEdgeDelta > cellWidth * 0.1 && cellLeftEdgeDelta < cellWidth * 0.9) {
                 //    if (cellTopEdgeDelta > cellHeight * 0.1 && cellTopEdgeDelta < cellHeight * 0.9) {
-                panelInteraction.cellPressedAt(col, row, e.target);
+                panelInteraction.cellPressedAt(col, row, $(this));
                 //    }
                 //}
 
@@ -93,9 +93,9 @@ var panelInteraction = {
 
     rgbRegexp: /rgb\(([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
 
-    cellPressedAt: function(x, y, el) {
+    cellPressedAt: function(x, y, $el) {
         if(panelInteraction.mouseButtonDown) {
-            var color = $(el).css('background-color');
+            var color = $el.css('background-color');
             var m = panelInteraction.rgbRegexp.exec(color);
             var r = parseInt(m[1]);
             var g = parseInt(m[2]);
@@ -105,19 +105,8 @@ var panelInteraction = {
                 b != panelInteraction.activeColor[2]) {
 
                 if(!panelInteraction.justLocal) {
-                    if( panelInteraction.useSocketIO ) {
-                        socketIOPanelUpdater.socket.emit('panel_press', {'x': x, 'y': y,
-                            'c': panelInteraction.activeColor} );
-                    } else {
-                        $.post('/a/press', {'x': x, 'y': y,
-                                'c': panelInteraction.activeColor},
-                            function(data) {
-                                // $('footer').text("OK");
-                                // log('server said:' + data)
-                            }
-                        );
-                    }
-
+                    socketIOPanelUpdater.socket.emit('panel_press', {'x': x, 'y': y,
+                        'c': panelInteraction.activeColor} );
                 }
                 if(panelInteraction.changeCallback) {
                     panelInteraction.changeCallback(x, y, panelInteraction.activeColor);

@@ -110,7 +110,7 @@ var animation = {
         as well if needed */
     panelChangedCallback: function(x, y, c) {
         log('panel changed')
-        var i = parseInt(x) + parseInt(y) * 8;
+        var i = parseInt(x) + parseInt(y) * 12; // width here...
         $($('#animate-panel td')[i]).css('background-color', 'rgb('+c[0]+','+c[1]+','+c[2]+')');
         if(animation.selectedFrame !== null) {
             var selectedFrameTable = $('div#frames table').get(animation.selectedFrame);

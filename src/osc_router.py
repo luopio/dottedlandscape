@@ -20,10 +20,14 @@ class OscRouter(object):
             self.ser.close()
             self.ser = None
     
+    
     def send(self, full_frame):
-        # send a all values as integers
         liblo.send(self.__target, "/dl/frame", *full_frame)
-            
+    
+    
+    def send_partial(self, x, y, r, g, b):
+        liblo.send(self.__target, "/dl/plot", x, y, r, g, b)
+        
 
 if __name__ == '__main__':
     # foo = 'a'
@@ -35,18 +39,26 @@ if __name__ == '__main__':
     
     osc = OscRouter()
     dlc = DottedLandscapeCommunicator()
-    dlc.connect('127.0.0.1', 2323)
+    dlc.connect('127.0.0.1', 2323, accept_partial_frames=True)
     
     done = False 
     while not done:
+        
         # get any incoming data from the DL server
         data = dlc.check_for_data()
-        if data:     # new frame received!
-            print "Osc got a frame!", len(data)
-            osc.send(data)
+        if not data:
+            continue
+        headers, payload = data 
+        
+        if headers[0] == dlc.dl_MAGIC_FRAME_PARTIAL:
+            print "Osc got a partial frame!", len(payload)
+            osc.send_partial(*payload)
+        
+        elif headers[0] == dlc.dl_MAGIC_FRAME_FULL:
+            print "Osc got a full frame!", len(payload)
+            osc.send(payload)
             
         else:
             time.sleep(0.05)
                 
-    
     dlc.disconnect()

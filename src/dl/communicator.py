@@ -9,10 +9,15 @@ class DottedLandscapeCommunicator(object):
         blip-protocol (i.e. this class can be used to talk with blip-protocol hosts as well).
     '''
     
+    # original full frame from Blinkenlights project. Matches dl_MAGIC_FRAME_FULL
     blip_MAGIC_MCU_FRAME = 0x23542666
+    # register for updates on panel changes, will receive full frames
     dl_MAGIC_NEW_CONNECTION = 0x11AEEE
-    dl_MAGIC_FRAME_PARTIAL = 0x114545 # partial frame with just changed dots
-    # dl_MAGIC_FRAME_FULL = 0x119898 # full frame received
+    # register for new updates to only partial frames (dot by dot)
+    dl_MAGIC_NEW_CONNECTION_PARTIAL = 0x11AEFF
+    # partial frame with just changed dots
+    dl_MAGIC_FRAME_PARTIAL = 0x114545
+    # a full frame
     dl_MAGIC_FRAME_FULL = 0x23542666
     
     def __init__(self, panel_changed_callback=None):
@@ -57,6 +62,10 @@ class DottedLandscapeCommunicator(object):
         elif header_data[0] == self.dl_MAGIC_NEW_CONNECTION:
             d = self.new_conn_data_struct.unpack(data[12:])
             payload_data = ('%s.%s.%s.%s' % d[:4], d[4]) 
+        
+        elif header_data[0] == self.dl_MAGIC_NEW_CONNECTION_PARTIAL:
+            d = self.new_conn_data_struct.unpack(data[12:])
+            payload_data = ('%s.%s.%s.%s' % d[:4], d[4]) 
             
         return header_data, payload_data
     
@@ -64,6 +73,13 @@ class DottedLandscapeCommunicator(object):
     def encode_handshake(self, ip, port):
         ip0, ip1, ip2, ip3 = [int(i) for i in ip.split('.')]
         data = self.header_struct.pack(self.dl_MAGIC_NEW_CONNECTION, 0, 0, 0, 0) + \
+               self.new_conn_data_struct.pack(ip0, ip1, ip2, ip3, port)
+        return data
+    
+    
+    def encode_partial_update_handshake(self, ip, port):
+        ip0, ip1, ip2, ip3 = [int(i) for i in ip.split('.')]
+        data = self.header_struct.pack(self.dl_MAGIC_NEW_CONNECTION_PARTIAL, 0, 0, 0, 0) + \
                self.new_conn_data_struct.pack(ip0, ip1, ip2, ip3, port)
         return data
     
@@ -92,21 +108,22 @@ class DottedLandscapeCommunicator(object):
                 return None
             
             if headers[0] in (self.blip_MAGIC_MCU_FRAME, self.dl_MAGIC_FRAME_FULL, self.dl_MAGIC_FRAME_PARTIAL):
-                print "DLCOMM >> valid frame found"
+                # print "DLCOMM >> valid frame found"
                 self._cached_payload = payload
-                return payload
+                return headers, payload
         except socket.error:
             pass # print "DLCOMM >> nothing to receive?"
         return None
         
 
-    def connect(self, host, port):
+    def connect(self, host, port, accept_partial_frames=False):
         print "DLCOMM >> connect to", host, ":", port
         self.server_host = host
         self.server_port = port
         receive_port = port + 1
         retries = 0
         connected = False
+        # look for a good port
         while not connected:
             receive_port += 1
             self.receive_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -115,17 +132,20 @@ class DottedLandscapeCommunicator(object):
                 connected = True
             except socket.error:
                 retries += 1
-                if retries > 30:
+                if retries > 100:
                     print "DLCOMM >> failed to initialize connection"
                     return None #failed        
         self.receive_socket.setblocking(0) # non-blocking
         
         # handshake!
         self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        packet = self.encode_handshake(host, receive_port)
-        self.send_socket.sendto(packet, 0, (host, port))
+        if accept_partial_frames:
+            packet = self.encode_partial_update_handshake(host, receive_port)
+            self.send_socket.sendto(packet, 0, (host, port))
+        else:
+            packet = self.encode_handshake(host, receive_port)
+            self.send_socket.sendto(packet, 0, (host, port))
             
-        
     
     def disconnect(self):
         self.send_socket.close()

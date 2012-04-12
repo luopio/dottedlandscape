@@ -17,7 +17,7 @@ TEXT_WRITER = TextWriter()
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
 
 # we define the panel here
-DL_COMMUNICATOR.define_panel(8, 8, 3)
+DL_COMMUNICATOR.define_panel(12, 9, 3)
 WEB_CLIENTS = []
 SOCKET_IO_CONNECTIONS = []
 ANALYTICS = Analytics()
@@ -36,10 +36,12 @@ class LiveHandler(tornado.web.RequestHandler):
         self.render("templates/index.html", saved_animations=anims)
 class DrawHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("templates/draw.html")
+        global ANIMATIONSTORAGE
+        anims = ANIMATIONSTORAGE.get_all_animations()
+        self.render("templates/index_control.html", saved_animations=anims)
 class AnimateHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("templates/animate.html")
+        self.render("templates/index_animate.html")
 class TextHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/text.html")
@@ -107,7 +109,7 @@ class PanelUpdateHandler(tornado.web.RequestHandler):
     
 
 def notify_clients_on_panel_change(fd, events):
-    data = DL_COMMUNICATOR.check_for_data()
+    _, data = DL_COMMUNICATOR.check_for_data()
     if data:
         global WEB_CLIENTS
         for w in WEB_CLIENTS:
@@ -174,6 +176,7 @@ class PlayAnimationThread(threading.Thread):
     def run(self):
         print "PlayAnimationThread: playing animation with %s frames." % len(self.frames)
         for frame in self.frames:
+            # HOW TO DEAL WITH ANIMATIONS THAT ARE DIFFERENT SIZE THAN PANEL??
             p = DL_COMMUNICATOR.encode_full_frame(frame[0])
             DL_COMMUNICATOR.send(p)
             time.sleep(float(frame[1]))
@@ -215,7 +218,7 @@ settings = {
 
 application = tornado.web.Application([
     (r"/",                      LiveHandler),
-    (r"/draw/",                 DrawHandler),
+    (r"/ctrl/",                 DrawHandler),
     (r"/animate/",              AnimateHandler),
     (r"/text/",                 TextHandler),
     

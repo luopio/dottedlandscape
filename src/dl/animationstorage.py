@@ -1,7 +1,7 @@
 import tornado, redis
 
 class AnimationStorage(object):
-    prefix = 'dl_'
+    prefix = 'dl_vj_'
 
     def __init__(self):
         self.r = redis.Redis()
