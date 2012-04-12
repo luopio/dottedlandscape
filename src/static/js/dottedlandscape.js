@@ -23,7 +23,7 @@ var panelInteraction = {
                 panelInteraction.mouseButtonDown = false; })
             $('body').bind('touchend', function(e) {
                 panelInteraction.mouseButtonDown = false; })
-            $('.color-changer div').click(panelInteraction.colorSelectionHandler);
+            $('.color-selection div').click(panelInteraction.colorSelectionHandler);
             panelInteraction.isInitialized = true;
         }
         if(element !== null) {
@@ -31,7 +31,6 @@ var panelInteraction = {
             $el.find('td').mouseenter(panelInteraction.cellPressedHandler);
             panelInteraction.panelWidth = $el.width();
             panelInteraction.panelHeight = $el.height();
-
             $el.bind('touchmove', panelInteraction.touchMoveHandler);
         }
         panelInteraction.changeCallback = changeCallback;
@@ -39,8 +38,8 @@ var panelInteraction = {
     },
 
     unBindAll: function() {
-        $('td').unbind('mouseenter');
-        $('div#animate, div#text, div#draw').unbind('touchmove');
+        //$('td').unbind('mouseenter');
+        //$('div#animate, div#text, div#draw').unbind('touchmove');
     },
 
     cellPressedHandler: function(e) {
@@ -92,18 +91,28 @@ var panelInteraction = {
     },
 
     rgbRegexp: /rgb\(([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
+    rgbaRegexp: /rgba\(([0-9]+), ?([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
 
     cellPressedAt: function(x, y, $el) {
         if(panelInteraction.mouseButtonDown) {
             var color = $el.css('background-color');
-            var m = panelInteraction.rgbRegexp.exec(color);
-            var r = parseInt(m[1]);
-            var g = parseInt(m[2]);
-            var b = parseInt(m[3]);
-            if( r != panelInteraction.activeColor[0] ||
+            
+            // some use rgba instead of rgb
+            var m = panelInteraction.rgbaRegexp.exec(color);
+            if(m == null) {
+                m = panelInteraction.rgbRegexp.exec(color);
+            }
+            if(m != null) {
+                var r = parseInt(m[1]);
+                var g = parseInt(m[2]);
+                var b = parseInt(m[3]);
+            }
+            
+            if( m == null || 
+                (r != panelInteraction.activeColor[0] ||
                 g != panelInteraction.activeColor[1] ||
-                b != panelInteraction.activeColor[2]) {
-
+                b != panelInteraction.activeColor[2]) ) {
+                
                 if(!panelInteraction.justLocal) {
                     socketIOPanelUpdater.socket.emit('panel_press', {'x': x, 'y': y,
                         'c': panelInteraction.activeColor} );

@@ -65,7 +65,6 @@
     $(function() {
 
         $('div#draw').bind('pageshow', function() {
-            log('page! dar')
             panelInteraction.bind("#draw-panel");
             socketIOPanelUpdater.bind("#draw-panel");
         });

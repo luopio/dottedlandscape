@@ -231,7 +231,12 @@ application = tornado.web.Application([
     **settings)
 
 if __name__ == "__main__":
-    application.listen(8888)
+    import sys
+    if len(sys.argv) > 0:
+        print "trying to connect via port 80"    
+        application.listen(80)
+    else:
+        application.listen(8888)
     
     # http_server = tornado.httpserver.HTTPServer(application)
     # http_server.listen(8888)
