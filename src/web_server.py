@@ -107,7 +107,7 @@ class PanelUpdateHandler(tornado.web.RequestHandler):
     
 
 def notify_clients_on_panel_change(fd, events):
-    data = DL_COMMUNICATOR.check_for_data()
+    _, data = DL_COMMUNICATOR.check_for_data()
     if data:
         global WEB_CLIENTS
         for w in WEB_CLIENTS:
@@ -228,7 +228,12 @@ application = tornado.web.Application([
     **settings)
 
 if __name__ == "__main__":
-    application.listen(8888)
+    import sys
+    if len(sys.argv) > 2:
+        print "trying to connect via port 80"
+        application.listen(80)
+    else:
+        application.listen(8888)
     
     # http_server = tornado.httpserver.HTTPServer(application)
     # http_server.listen(8888)

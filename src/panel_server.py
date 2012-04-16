@@ -15,6 +15,8 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
         self.send_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.receive_socket = None
         self.receivers = []
+        # receivers that only wish to hear plot-by-plot updates, not whole frames
+        self.partial_receivers = None
         self.additive_coloring = additive_coloring
         self.fade_out = fade_out
         self.__fade_out_counters = None
@@ -52,11 +54,12 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     def plot_full(self, data):
         i = 0
         while i < len(data):
-            # absolute coloring, except for blacks
+            # absolute coloring
+            # if data[i] + data[i + 1] + data[i + 2] > 0:
+            self.__panel_data[i] = data[i]
+            self.__panel_data[i + 1] = data[i + 1]
+            self.__panel_data[i + 2] = data[i + 2]
             if data[i] + data[i + 1] + data[i + 2] > 0:
-                self.__panel_data[i] = data[i]
-                self.__panel_data[i + 1] = data[i + 1]
-                self.__panel_data[i + 2] = data[i + 2]
                 self.__fade_out_counters[int(i / 3)] = 15
             i += 3
         self.__panel_changed = True
@@ -86,23 +89,35 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
             sys.exit(1)
     
     
-    def add_new_receiver(self, payload_data):
+    def add_new_receiver(self, payload_data, accept_partial_frames=False):
         ip, port = payload_data[0], payload_data[1]
-        if (ip, port) not in self.receivers:
-            print "dl_server: new listener at (%s, %s)" % (ip, port)
+        if (ip, port, accept_partial_frames) not in self.receivers:
+            print "dl_server: new listener at (%s, %s). Accepts partial frames? %s" % (ip, port, accept_partial_frames)
             if self.__panel_data:
                 packet = self.encode_full_frame(self.__panel_data)
                 self.send_socket.sendto(packet, 0, (ip, port))
-            self.receivers.append((ip, port))
+            self.receivers.append((ip, port, accept_partial_frames))
     
     
-    def notify_receivers(self):
+    def notify_receivers(self, is_partial_frame=False):
         packet = self.encode_full_frame(self.__panel_data)
-        for ip, port in self.receivers:
-            # print "notify receiver at", ip, port
-            self.send_socket.sendto(packet, 0, (ip, port))
+        for ip, port, accepts_partial_frames in self.receivers:
+            # partial frame listeners get the change in more compact form
+            if not( is_partial_frame and accepts_partial_frames ):
+                self.send_socket.sendto(packet, 0, (ip, port))
     
     
+    def notify_partial_receivers(self, data):
+        ''' Some receivers are only interested in x,y and color - not full frame data.
+            This notifies all of those. Full frame updates are not sent via this way. '''
+        x, y, r, g, b = data
+        packet = self.encode_partial_frame(x, y, (r, g, b))
+        for ip, port, accepts_partial_frames in self.receivers:
+            if accepts_partial_frames:
+                print "notify partial receiver at", ip, port
+                self.send_socket.sendto(packet, 0, (ip, port))
+
+
     def start(self):
         print "start"
         self.keep_on_doing_it = True
@@ -121,11 +136,15 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
             if header[0] == self.dl_MAGIC_NEW_CONNECTION:
                 self.add_new_receiver(payload)
             
+            elif header[0] == self.dl_MAGIC_NEW_CONNECTION_PARTIAL:
+                self.add_new_receiver(payload, accept_partial_frames=True)
+
             elif header[0] == self.dl_MAGIC_FRAME_PARTIAL:
                 if not self.__panel_data:
                     self.prepare_panel(header[2], header[1], header[3])
                 self.plot_partial(payload)
-                self.notify_receivers()
+                self.notify_receivers(is_partial_frame=True)
+                self.notify_partial_receivers(payload)
             
             elif header[0] == self.dl_MAGIC_FRAME_FULL or header[0] == self.blip_MAGIC_MCU_FRAME:
                 if not self.__panel_data:

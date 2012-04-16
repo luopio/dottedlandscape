@@ -49,7 +49,7 @@ if __name__ == '__main__':
     done = False 
     while not done:
         # get any incoming data from the DL server
-        data = dlc.check_for_data()
+        _, data = dlc.check_for_data()
         if data:     # new frame received!
             print "frame!", len(data)
             

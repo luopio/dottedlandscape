@@ -44,7 +44,7 @@ def on_receive(data):
 
 try:
     while not led_panel_initialized:
-        data = dlc.check_for_data()
+        _, data = dlc.check_for_data()
         if data: on_receive(data)
         time.sleep(0.5)
 except KeyboardInterrupt:     
@@ -57,7 +57,7 @@ while done == False:
     clock.tick(100)
     
     # get any incoming data from the DL server
-    data = dlc.check_for_data()
+    _, data = dlc.check_for_data()
     if data: on_receive(data)
     
     for event in pygame.event.get():

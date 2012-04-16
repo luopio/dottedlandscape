@@ -23,7 +23,7 @@ var panelInteraction = {
                 panelInteraction.mouseButtonDown = false; })
             $('body').bind('touchend', function(e) {
                 panelInteraction.mouseButtonDown = false; })
-            $('.color-changer div').click(panelInteraction.colorSelectionHandler);
+            $('.color-selection div').click(panelInteraction.colorSelectionHandler);
             panelInteraction.isInitialized = true;
         }
         if(element !== null) {
@@ -31,7 +31,6 @@ var panelInteraction = {
             $el.find('td').mouseenter(panelInteraction.cellPressedHandler);
             panelInteraction.panelWidth = $el.width();
             panelInteraction.panelHeight = $el.height();
-
             $el.bind('touchmove', panelInteraction.touchMoveHandler);
         }
         panelInteraction.changeCallback = changeCallback;
@@ -47,7 +46,7 @@ var panelInteraction = {
         if(panelInteraction.mouseButtonDown) {
             var x = $(this).data('x');
             var y = $(this).data('y');
-            panelInteraction.cellPressedAt(x, y, e.target);
+            panelInteraction.cellPressedAt(x, y, $(this));
         }
     },
 
@@ -83,7 +82,7 @@ var panelInteraction = {
                 // alert('deltas: ' + cellLeftEdgeDelta + ", " + cellTopEdgeDelta+' w/h ' + cellWidth + ", " + cellHeight);
                 //if (cellLeftEdgeDelta > cellWidth * 0.1 && cellLeftEdgeDelta < cellWidth * 0.9) {
                 //    if (cellTopEdgeDelta > cellHeight * 0.1 && cellTopEdgeDelta < cellHeight * 0.9) {
-                panelInteraction.cellPressedAt(col, row, e.target);
+                panelInteraction.cellPressedAt(col, row, $(this));
                 //    }
                 //}
 
@@ -92,32 +91,31 @@ var panelInteraction = {
     },
 
     rgbRegexp: /rgb\(([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
+    rgbaRegexp: /rgba\(([0-9]+), ?([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
 
-    cellPressedAt: function(x, y, el) {
+    cellPressedAt: function(x, y, $el) {
         if(panelInteraction.mouseButtonDown) {
-            var color = $(el).css('background-color');
-            var m = panelInteraction.rgbRegexp.exec(color);
-            var r = parseInt(m[1]);
-            var g = parseInt(m[2]);
-            var b = parseInt(m[3]);
-            if( r != panelInteraction.activeColor[0] ||
+            var color = $el.css('background-color');
+
+            // some use rgba instead of rgb
+            var m = panelInteraction.rgbaRegexp.exec(color);
+            if(m == null) {
+                m = panelInteraction.rgbRegexp.exec(color);
+            }
+            if(m != null) {
+                var r = parseInt(m[1]);
+                var g = parseInt(m[2]);
+                var b = parseInt(m[3]);
+            }
+
+            if( m == null ||
+                (r != panelInteraction.activeColor[0] ||
                 g != panelInteraction.activeColor[1] ||
-                b != panelInteraction.activeColor[2]) {
+                b != panelInteraction.activeColor[2]) ) {
 
                 if(!panelInteraction.justLocal) {
-                    if( panelInteraction.useSocketIO ) {
-                        socketIOPanelUpdater.socket.emit('panel_press', {'x': x, 'y': y,
-                            'c': panelInteraction.activeColor} );
-                    } else {
-                        $.post('/a/press', {'x': x, 'y': y,
-                                'c': panelInteraction.activeColor},
-                            function(data) {
-                                // $('footer').text("OK");
-                                // log('server said:' + data)
-                            }
-                        );
-                    }
-
+                    socketIOPanelUpdater.socket.emit('panel_press', {'x': x, 'y': y,
+                        'c': panelInteraction.activeColor} );
                 }
                 if(panelInteraction.changeCallback) {
                     panelInteraction.changeCallback(x, y, panelInteraction.activeColor);
