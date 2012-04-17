@@ -34,30 +34,22 @@
 
 <body id="{% block body_id %}{% end %}">
 
-<div data-role="page" id="draw">
-        {% include "draw.html" %}
-        <!-- <form>
-            <label for="slider">Funkyness</label>
-            <input id="slider" type="range" name="slider" value="1.0" min="0.1" max="1.5"/>
+<!-- The draw, aka "paint" functionality -->
+{% include "draw.html" %}
 
-        </form>-->
-    <!-- /content -->
+<!-- Animate page -->
+{% include "animate.html" %}
 
-</div>
+<!-- Text page -->
+{% include "text.html" %}
 
-<div data-role="page" id="animate">
-    {% include "animate.html" %}
-</div>
 
-<div data-role="page" id="text">
-    {% include "text.html" %}
-</div>
 
 <!-- include the needed scripts -->
 <script src="{{ static_url('js/libs/jquery-1.6.4.min.js') }}"></script>
 <script src="{{ static_url('js/libs/socket.io.js') }}"></script>
 <script type="text/javascript">
-    WEB_SOCKET_SWF_LOCATION = {{ static_url('/js/libs/WebSocketMain.swf') }};
+    WEB_SOCKET_SWF_LOCATION = "{{ static_url('js/libs/WebSocketMain.swf') }}";
 </script>
 <script src="{{ static_url('js/log.js') }}"></script>
 <script src="{{ static_url('js/dottedlandscape.js') }}"></script>

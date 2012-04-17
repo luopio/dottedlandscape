@@ -47,7 +47,7 @@ pre {
   padding: 15px;
 }
 textarea { overflow: auto; }
-.ie6 legend, .ie7 legend { margin-left: -7px; } 
+.ie6 legend, .ie7 legend { margin-left: -7px; }
 input[type="radio"] { vertical-align: text-bottom; }
 input[type="checkbox"] { vertical-align: bottom; }
 .ie7 input[type="checkbox"] { vertical-align: baseline; }
@@ -67,12 +67,9 @@ button {  width: auto; overflow: visible; }
 
 body, select, input, textarea {
   color: #333;
-  font-family: Verdana, Arial; 
+  font-family: Verdana, Arial;
 }
 h1, h2, h3, h4, h5, h6 { font-weight: bold; }
-
-a, a:active, a:visited { color: #607890; }
-a:hover { color: #036; }
 
 
 /**
@@ -90,9 +87,13 @@ h2 {
 h3 {
     text-transform: uppercase;
 }
-cc
+
 table.panel {
     margin: auto;
+}
+table.panel.inline {
+    width: auto;
+    display: inline-block;
 }
 
 div#main div#message-sending {
@@ -126,11 +127,11 @@ div#main div#message-sending {
 div#saved-animations {
     margin: 8px 4px;
     text-align: center;
-    max-width: 35em;
+    max-width: 100%;
     overflow: hidden;
 
     div {
-        margin: 3% 3% 3% 0;
+        margin: 2%;
         font-size: 0.9em;
         text-align: center;
         width: 41%;
@@ -149,6 +150,8 @@ div#saved-animations {
         display: inline-block;
         height: 45px;
         overflow: hidden;
+        max: . height: 45px;
+        max-height: 45px;
     }
     table {
         margin: auto;
@@ -260,6 +263,7 @@ div.color-selection div.active {
     }
     div#saved-animations div {
         width: 25%;
+        margin: 2%;
     }
 
 }
@@ -284,6 +288,7 @@ div.color-selection div.active {
     
     div#saved-animations {
         width: 100%;
+        max-width: 100%;
     }
     
     table.panel:not(.smaller-live-panel) {

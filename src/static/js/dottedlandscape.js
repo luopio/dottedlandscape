@@ -162,18 +162,20 @@ var socketIOPanelUpdater = {
     panelCells: [],
 
     bind: function(element) {
+        log('socket.io connection started on ' + new Date().toGMTString());
         var $el = $(element);
         socketIOPanelUpdater.panelCells = $el.find('td');
+
         socketIOPanelUpdater.socket = io.connect('/');
-        socketIOPanelUpdater.socket.on('dl_panel_data', socketIOPanelUpdater.onSuccess);
+        log('socket.io connected on ' + new Date().toGMTString());
+        socketIOPanelUpdater.socket.on('dl_panel_data', socketIOPanelUpdater.onPanelData);
     },
 
-    onSuccess: function(data) {
+    onPanelData: function(data) {
         if(data != socketIOPanelUpdater.previousDataPacket) {
             var counter = 0;
             socketIOPanelUpdater.panelCells.each(function (e) {
                 $(this).css('background-color', 'rgb('+data[counter]+','+data[counter+1]+','+data[counter+2]+')');
-                // $(this).text(counter);
                 counter += 3;
             });
             socketIOPanelUpdater.previousDataPacket = data;

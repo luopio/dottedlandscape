@@ -1,43 +1,44 @@
+<div data-role="page" id="draw" data-theme="a">
+    <div data-role="header">
+        <h1>Dotted Landscape</h1>
 
-<div data-role="header">
-    <h1>Dotted Landscape</h1>
-    <div data-role="navbar">
-        <ul>
-            <li>
-                <a href="#draw" class="ui-btn-active">Draw</a>
-            </li>
-            <li>
-                <a href="#animate">Animate</a>
-            </li>
-            <li>
-                <a href="#text">Text</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-<div data-role="content">
-
-    <div id="color-selection-draw" class="color-selection">
-        <!---
-         <div style="background:rgb(255, 255, 0);"></div>
-        <div style="background:rgb(255, 255, 255);"></div>
-        <div style="background:rgb(0, 255, 255);"></div>
-        -->
-        <div class="active" style="background:rgb(255, 0, 0);"></div>
-        <div style="background:rgb(255, 255, 0);"></div>
-        <div style="background:rgb(0, 255, 255);"></div>
-        <div style="background:rgb(255, 0, 255);"></div>
-        <div style="background:rgb(255, 255, 255);"></div>
-        <div style="background:rgb(0, 255, 0);"></div>
-        <div style="background:rgb(0, 0, 255);"></div>
-        <div style="background:rgb(0, 0, 0);"></div>
+        <div data-role="navbar">
+            <ul>
+                <li>
+                    <a href="#draw" class="ui-btn-active">Draw</a>
+                </li>
+                <li>
+                    <a href="#animate">Animate</a>
+                </li>
+                <li>
+                    <a href="#text">Text</a>
+                </li>
+            </ul>
+        </div>
     </div>
 
-    <table id="draw-panel" class="panel">
-        <thead></thead>
-        <tfoot></tfoot>
-        <tbody>
+    <div data-role="content">
+
+        <div id="color-selection-draw" class="color-selection">
+            <!---
+             <div style="background:rgb(255, 255, 0);"></div>
+            <div style="background:rgb(255, 255, 255);"></div>
+            <div style="background:rgb(0, 255, 255);"></div>
+            -->
+            <div class="active" style="background:rgb(255, 0, 0);"></div>
+            <div style="background:rgb(255, 255, 0);"></div>
+            <div style="background:rgb(0, 255, 255);"></div>
+            <div style="background:rgb(255, 0, 255);"></div>
+            <div style="background:rgb(255, 255, 255);"></div>
+            <div style="background:rgb(0, 255, 0);"></div>
+            <div style="background:rgb(0, 0, 255);"></div>
+            <div style="background:rgb(0, 0, 0);"></div>
+        </div>
+
+        <table id="draw-panel" class="panel">
+            <thead></thead>
+            <tfoot></tfoot>
+            <tbody>
             {% for y in xrange(0, 8) %}
             <tr>
                 {% for x in xrange(0, 8) %}
@@ -45,29 +46,30 @@
                 {% end %}
             </tr>
             {% end %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
 
-    <div id="saved-animations">
-        <h2> Saved animations </h2>
-        {% for a in saved_animations %}
+        <div id="saved-animations">
+            <h2> Saved animations </h2>
+            {% for a in saved_animations %}
             <div animation-title="{{a[0]}}">
                 <span>{{ a[0] }} by <i>{{ a[1] }}</i></span>
                 <table>
                     <thead></thead>
                     <tfoot></tfoot>
                     <tbody>
-                        {% for y in xrange(0, 192, 24) %}
-                        <tr>
-                            {% for x in xrange(0, 24, 3) %}
-                            <td style="background-color: rgb({{a[2][0][x + y]}}, {{a[2][0][x + y + 1]}}, {{a[2][0][x + y + 2]}})"></td>
-                            {% end %}
-                        </tr>
+                    {% for y in xrange(0, 192, 24) %}
+                    <tr>
+                        {% for x in xrange(0, 24, 3) %}
+                        <td style="background-color: rgb({{a[2][0][x + y]}}, {{a[2][0][x + y + 1]}}, {{a[2][0][x + y + 2]}})"></td>
                         {% end %}
+                    </tr>
+                    {% end %}
                     </tbody>
                 </table>
             </div>
-        {% end %}
-    </div>
+            {% end %}
+        </div>
 
+    </div>
 </div>

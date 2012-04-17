@@ -43,7 +43,7 @@ var animation = {
         var frameLength = $('#frame-length').find('input:checked').val();
         log('frame of len ' + frameLength)
         var $thumb = $('#animate-panel').clone();
-        $thumb.attr('id', '').data('duration', frameLength);
+        $thumb.attr('id', '').data('duration', frameLength).addClass('inline');
         $thumb.find('td').data('x', '').data('y', '');
         $thumb.css('display', 'inline-block');
         $thumb.click(animation.frameSelectedEvent);
@@ -145,7 +145,10 @@ var animation = {
     },
     
     upload: function() {
-        
+
+        $('#animation-saved-dialog').find('p span').text($('#animation-title').val());
+        $.mobile.changePage('#animation-saved-dialog', 'pop', true, true);
+
         if(!$('#animation-title').val()) {
             alert('Please enter a name for your piece.');
             return;            
@@ -171,8 +174,7 @@ var animation = {
             function(data) {
                 //log('save animation: server said:' + data)
                 if(data && data.status == 'ok') {
-                    alert('Animation has been saved as '+data.name+
-                    ' on the server! You can now play it in the Paint view.')
+                    $('#animation-saved-dialog').dialog('open');
                 }  
             }, 
             'json'

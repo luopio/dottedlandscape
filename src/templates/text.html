@@ -1,50 +1,51 @@
-<div data-role="header">
-    <h1>Dotted Landscape</h1>
-    <div data-role="navbar">
-        <ul>
-            <li>
-                <a href="#draw">Draw</a>
-            </li>
-            <li>
-                <a href="#animate">Animate</a>
-            </li>
-            <li>
-                <a href="#text" class="ui-btn-active">Text</a>
-            </li>
-        </ul>
+<div data-role="page" id="text" data-theme="d">
+    <div data-role="header">
+        <h1>Dotted Landscape</h1>
+
+        <div data-role="navbar">
+            <ul>
+                <li>
+                    <a href="#draw">Draw</a>
+                </li>
+                <li>
+                    <a href="#animate">Animate</a>
+                </li>
+                <li>
+                    <a href="#text" class="ui-btn-active">Text</a>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
+    <div data-role="content">
 
-<div data-role="content">
+        <div id="color" class="color-selection">
+            <!--
+             <div style="background:rgb(255, 255, 0);"></div>
+            <div style="background:rgb(255, 255, 255);"></div>
+            <div style="background:rgb(0, 255, 255);"></div>
+            -->
+            <div class="active" style="background:rgb(255, 0, 0);"></div>
+            <div style="background:rgb(255, 255, 0);"></div>
+            <div style="background:rgb(0, 255, 255);"></div>
+            <div style="background:rgb(255, 0, 255);"></div>
+            <div style="background:rgb(255, 255, 255);"></div>
+            <div style="background:rgb(0, 255, 0);"></div>
+            <div style="background:rgb(0, 0, 255);"></div>
+            <div style="background:rgb(0, 0, 0);"></div>
+        </div>
 
-    <div id="color" class="color-selection">
-        <!--
-         <div style="background:rgb(255, 255, 0);"></div>
-        <div style="background:rgb(255, 255, 255);"></div>
-        <div style="background:rgb(0, 255, 255);"></div>
-        -->
-        <div class="active" style="background:rgb(255, 0, 0);"></div>
-        <div style="background:rgb(255, 255, 0);"></div>
-        <div style="background:rgb(0, 255, 255);"></div>
-        <div style="background:rgb(255, 0, 255);"></div>
-        <div style="background:rgb(255, 255, 255);"></div>
-        <div style="background:rgb(0, 255, 0);"></div>
-        <div style="background:rgb(0, 0, 255);"></div>
-        <div style="background:rgb(0, 0, 0);"></div>
-    </div>
+        <div id="message-sending">
+            <form action="" method="">
+                <input type="text" name="message" id="message"/>
+                <input type="button" value="send" id="send-button"/>
+            </form>
+        </div>
 
-    <div id="message-sending">
-        <form action="" method="">
-            <input type="text" name="message" id="message" />
-            <input type="button" value="send" id="send-button" />
-        </form>
-    </div>
-
-    <div id="small-panel-container">
-        <table id="text-panel" class="smaller-live-panel">
-            <thead></thead>
-            <tfoot></tfoot>
-            <tbody>
+        <div id="small-panel-container">
+            <table id="text-panel" class="smaller-live-panel">
+                <thead></thead>
+                <tfoot></tfoot>
+                <tbody>
                 {% for y in range(0, 8) %}
                 <tr>
                     {% for x in range(0, 8) %}
@@ -52,7 +53,8 @@
                     {% end %}
                 </tr>
                 {% end %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

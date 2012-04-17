@@ -1,35 +1,36 @@
-<div data-role="header">
-    <h1>Dotted Landscape</h1>
-    <div data-role="navbar">
-        <ul>
-            <li>
-                <a href="#draw">Draw</a>
-            </li>
-            <li>
-                <a href="#animate" class="ui-btn-active">Animate</a>
-            </li>
-            <li>
-                <a href="#text">Text</a>
-            </li>
-        </ul>
+<div data-role="page" id="animate" data-theme="b">
+    <div data-role="header">
+        <h1>Dotted Landscape</h1>
+
+        <div data-role="navbar">
+            <ul>
+                <li>
+                    <a href="#draw">Draw</a>
+                </li>
+                <li>
+                    <a href="#animate" class="ui-btn-active">Animate</a>
+                </li>
+                <li>
+                    <a href="#text">Text</a>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
+    <div data-role="content">
 
-<div data-role="content">
+        <div class="color-selection">
+            <div class="active" style="background:rgb(255, 0, 0);"></div>
+            <div style="background:rgb(255, 255, 0);"></div>
+            <div style="background:rgb(0, 255, 255);"></div>
+            <div style="background:rgb(255, 0, 255);"></div>
+            <div style="background:rgb(255, 255, 255);"></div>
+            <div style="background:rgb(0, 255, 0);"></div>
+            <div style="background:rgb(0, 0, 255);"></div>
+            <div style="background:rgb(0, 0, 0);"></div>
+        </div>
 
-    <div class="color-selection">
-        <div class="active" style="background:rgb(255, 0, 0);"></div>
-        <div style="background:rgb(255, 255, 0);"></div>
-        <div style="background:rgb(0, 255, 255);"></div>
-        <div style="background:rgb(255, 0, 255);"></div>
-        <div style="background:rgb(255, 255, 255);"></div>
-        <div style="background:rgb(0, 255, 0);"></div>
-        <div style="background:rgb(0, 0, 255);"></div>
-        <div style="background:rgb(0, 0, 0);"></div>
-    </div>
-
-    <table id="animate-panel" class="panel">
-        <tbody>
+        <table id="animate-panel" class="panel">
+            <tbody>
             {% for y in range(0, 8) %}
             <tr>
                 {% for x in range(0, 8) %}
@@ -37,49 +38,63 @@
                 {% end %}
             </tr>
             {% end %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
 
-    <div id="frame-options">
-        <legend>Frame length: <span></span> seconds</legend>
-        <fieldset id="frame-length" data-role="controlgroup" data-type="horizontal">
-            <input type="radio" name="frame-length" id="radio-choice-1" value="0.05" />
-            <label for="radio-choice-1">0.05s</label>
+        <div id="frame-options">
+            <legend>Frame length: <span></span> seconds</legend>
+            <fieldset id="frame-length" data-role="controlgroup" data-type="horizontal">
+                <input type="radio" name="frame-length" id="radio-choice-1" value="0.05"/>
+                <label for="radio-choice-1">0.05s</label>
 
-            <input type="radio" name="frame-length" id="radio-choice-2" value="0.2" checked="checked" />
-            <label for="radio-choice-2">0.2s</label>
+                <input type="radio" name="frame-length" id="radio-choice-2" value="0.2" checked="checked"/>
+                <label for="radio-choice-2">0.2s</label>
 
-            <input type="radio" name="frame-length" id="radio-choice-3" value="0.5"/>
-            <label for="radio-choice-3">0.5</label>
-        </fieldset>
+                <input type="radio" name="frame-length" id="radio-choice-3" value="0.5"/>
+                <label for="radio-choice-3">0.5</label>
+            </fieldset>
 
-        <div id="frame-move-controls" style="display: none;" data-role="controlgroup" data-type="horizontal">
-            <a id="move-frame-backward" data-role="button" data-icon="arrow-l">&nbsp;</a>
-            <a id="delete-frame" data-role="button" data-icon="delete">Delete</a>
-            <a id="move-frame-forward" data-role="button" data-icon="arrow-r" data-iconpos="right">&nbsp;</a>
-        </div>
+            <div id="frame-move-controls" style="display: none;" data-role="controlgroup" data-type="horizontal">
+                <a id="move-frame-backward" data-role="button" data-icon="arrow-l">&nbsp;</a>
+                <a id="delete-frame" data-role="button" data-icon="delete">Delete</a>
+                <a id="move-frame-forward" data-role="button" data-icon="arrow-r" data-iconpos="right">&nbsp;</a>
+            </div>
 
-        <div id="frames">
-            <div id="add-frame">
-                <a href="" data-role="button" data-icon="add" data-inline="true">Add frame</a>
+            <div id="frames">
+                <div id="add-frame">
+                    <a href="" data-role="button" data-icon="add" data-inline="true">Add frame</a>
+                </div>
             </div>
         </div>
-    </div>
 
 
-    <div id="controls">
-        <a id="play-button" data-role="button">Play</a>
+        <div id="controls">
+            <a id="play-button" data-role="button">Play</a>
+        </div>
+
+        <div id="upload">
+            <h3>Upload and Share Animation</h3>
+            <label for="animation-title">Title</label>
+            <input type="text" name="animation-title" id="animation-title"/>
+            <br/>
+            <label for="animation-author">Author</label>
+            <input type="text" name="animation-author" id="animation-author"/>
+            <br/>
+            <a id="upload-button" data-role="button">Upload</a>
+        </div>
     </div>
 
-    <div id="upload">
-        <h3>Upload and Share Animation</h3>
-        <label for="animation-title">Title</label>
-        <input type="text" name="animation-title" id="animation-title" />
-        <br />
-        <label for="animation-author">Author</label>
-        <input type="text" name="animation-author" id="animation-author" />
-        <br />
-        <a id="upload-button" data-role="button">Upload</a>
-    </div>
 </div>
 
+<div data-role="dialog" id="animation-saved-dialog">
+    <div data-role="content">
+        <h1>Animation saved!</h1>
+        <p>
+            Animation has been saved as
+            <span></span>
+            on the server! You can now play it in the Paint view.
+        </p>
+        <a data-theme="a" data-rel="back" data-role="button" href="#draw">Go to the Paint view</a>
+        <a data-theme="a" data-rel="back" data-role="button" data-direction="reverse">Cancel</a>
+    </div>
+</div>
