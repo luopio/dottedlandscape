@@ -13,11 +13,10 @@ from dl.text_writer import TextWriter
 from dl.analytics import Analytics
 from dl.animationstorage import AnimationStorage
 
-TEXT_WRITER = TextWriter()
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
-
 # we define the panel here
 DL_COMMUNICATOR.define_panel(8, 8, 3)
+TEXT_WRITER = TextWriter(8, 8, 3)
 WEB_CLIENTS = []
 SOCKET_IO_CONNECTIONS = []
 ANALYTICS = Analytics()
@@ -50,6 +49,7 @@ class PlayMessageHandler(tornado.web.RequestHandler):
         args = self.request.arguments
         message = args['message'][0]
         color = args['color[]']
+        for i, c in enumerate(color): color[i] = int(c)
 
         print "MESSAGE COLOR:", color
         user_data = create_user_fingerprint(self.request)
@@ -62,6 +62,7 @@ class PlayMessageHandler(tornado.web.RequestHandler):
             pt.start()
             self.set_header("Content-Type", "application/json")
             self.write('ok')
+            print "RETURNED FROM PT"
         else:
             self.set_header("Content-Type", "application/json")
             self.write('fail: no message or message too long')
@@ -111,12 +112,12 @@ def notify_clients_on_panel_change(fd, events):
     if data:
         global WEB_CLIENTS
         for w in WEB_CLIENTS:
-            print "notify client %s!" % w
+            # print "notify client %s!" % w
             w(data)
         WEB_CLIENTS = []
         global SOCKET_IO_CONNECTIONS
         for i in SOCKET_IO_CONNECTIONS:
-            print "notify socketio! %s" % i
+            # print "notify socketio! %s" % i
             i(data)
 
 

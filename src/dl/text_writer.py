@@ -1,42 +1,77 @@
 import alphabet
 
-# how to draw?
-# option 1: draw first letter in middle, second in start, moving first (playwwords)
-#            => fade out after time
-# option 2: make letters move all the time
-
 class TextWriter(object):
-    
-    channels = 3
-    
-    def update(self):
-        pass
-    
-    def write(self, letter, data_structure, offset=0, color=[255, 0, 0]):
+
+    def __init__(self, w, h, c):
+        self.panel_width = w
+        self.panel_height = h
+        self.channels = c
+        self.alphabet_letter_width = 8 # restriction here..
+
+
+    def write(self, letter, frame, frame_width, offset=0, color=[255, 0, 0]):
         if letter in alphabet.ALPHABET_BITS:
             bits = alphabet.ALPHABET_BITS[letter]
-            for i in xrange(offset, len(data_structure) / self.channels):
-                for ii, c in enumerate(color):
-                    data_structure[i * self.channels + ii] = bits[i] * int(c)
-        return data_structure
-                
+            for i, b in enumerate(bits):
+                if b:
+                    pixel_index = offset + i % self.alphabet_letter_width + i / self.alphabet_letter_width * frame_width
+                    # TODO: hardcoded channels
+                    frame[pixel_index * self.channels] = color[0]
+                    frame[pixel_index * self.channels + 1] = color[1]
+                    frame[pixel_index * self.channels + 2] = color[2]
+
+
+#            for i in xrange(offset, len(data_structure) / self.channels):
+#                for ii, c in enumerate(color):
+#                    data_structure[i * self.channels + ii] = bits[i] * int(c)
+        # return frame
+
+
     def get_all_frames(self, message, color=[255, 0, 0]):
         # FIXME: hardcoded here. move into a generator to save mem?
         frames = []
         message = message.lower()
+        if len(message) > 20: message = message[:17] + "..."
+
+        # build one big image that contains all the letters
+        big_image = [0] *self.panel_width * self.panel_height * self.channels * (len(message) + 1)
+        for i, l in enumerate(message):
+            self.write(l, big_image, self.panel_width * len(message), offset=self.panel_width * i, color=color)
+
+
+#        for i in xrange(0, len(big_image), 3):
+#            if big_image[i]: print "*",
+#            else: print ".",
+#            if i % 8 == 0:
+#                print
+
+
+        # big image is ready, now return small frames from it, one per x-pixel
+        offset = 0
+        print "size of big image", len(big_image)
+        for i in xrange(0, self.panel_width * len(message)):
+            frame = [0] * self.panel_width * self.panel_height * self.channels
+            print "frame with offset", offset
+            for yi in xrange(0, self.panel_height):
+                for xi in xrange(0, self.panel_width):
+                    pixel_index = (offset + xi) + yi * self.panel_width * len(message)
+                    frame_pixel_index = xi + yi * self.panel_width
+                    print "pi", pixel_index, "fpi", frame_pixel_index
+                    # TODO: hardcoded channels
+                    frame[frame_pixel_index * self.channels]        = big_image[pixel_index * self.channels]
+                    frame[frame_pixel_index * self.channels + 1]    = big_image[pixel_index * self.channels + 1]
+                    frame[frame_pixel_index * self.channels + 2]    = big_image[pixel_index * self.channels + 2]
+            frames.append((frame, 0.1))
+            offset += 1
         # create one frame for each letter in the message
-        for l in message:
-            data_buffer = self.write(l, [0 for i in xrange(8*8*3)], color=color)
-            frames.append((data_buffer, 0.9)) # frame duration constant...
+#        for l in message:
+#            data_buffer = self.write(l, [0 for i in xrange(8*8*3)], color=color)
+#            frames.append((data_buffer, 0.9)) # frame duration constant...
         return frames    
-                
+
+
+
 if __name__=='__main__':
-    # this is not the way to go IRL
-    # - panel only now notifies on change, changes are accepted only
-    #   via network (nice, clean model)
-    # too many gevent.sleeps/spawns everywhere... ok for testing..
-    # bigger question: how to do animations? other processes affecting panel state?
-    # maybe build a generic cmdline command sender for simple communicator testing
     import dl_server
     import gevent
     

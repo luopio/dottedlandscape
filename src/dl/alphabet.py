@@ -1,5 +1,7 @@
 #coding=utf-8
 
+# Restriction here: 8 x 8 matrix
+
 ALPHABET_GRAPHICS = {
 
 'a':'''
