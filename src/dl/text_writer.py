@@ -26,8 +26,6 @@ class TextWriter(object):
 
 
     def get_all_frames(self, message, color=[255, 0, 0]):
-        # FIXME: hardcoded here. move into a generator to save mem?
-        frames = []
         message = message.lower()
         if len(message) > 20: message = message[:17] + "..."
         message += " "
@@ -37,34 +35,19 @@ class TextWriter(object):
         for i, l in enumerate(message):
             self.write(l, big_image, self.panel_width * len(message), offset=self.panel_width * i, color=color)
 
-
-#        for i in xrange(0, len(big_image), 3):
-#            if big_image[i]: print "*",
-#            else: print ".",
-#            if i % 8 == 0:
-#                print
-
-
         # big image is ready, now return small frames from it, one per x-pixel
         offset = 0
-        print "size of big image", len(big_image)
+        frame = [0] * self.panel_width * self.panel_height * self.channels
         for i in xrange(0, self.panel_width * (len(message) - 1)):
-            frame = [0] * self.panel_width * self.panel_height * self.channels
-            print "frame with offset", offset
             for yi in xrange(0, self.panel_height):
                 for xi in xrange(0, self.panel_width):
                     pixel_index = (offset + xi) + yi * self.panel_width * len(message)
                     frame_pixel_index = xi + yi * self.panel_width
-                    print "pi", pixel_index, "fpi", frame_pixel_index
                     for ci in xrange(0, self.channels):
                         frame[frame_pixel_index * self.channels + ci] = big_image[pixel_index * self.channels + ci]
-            frames.append((frame, 0.1))
+            # frames.append((frame, 0.1))
+            yield (frame, 0.1)
             offset += 1
-        # create one frame for each letter in the message
-#        for l in message:
-#            data_buffer = self.write(l, [0 for i in xrange(8*8*3)], color=color)
-#            frames.append((data_buffer, 0.9)) # frame duration constant...
-        return frames    
 
 
 

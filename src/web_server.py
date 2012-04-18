@@ -57,8 +57,7 @@ class PlayMessageHandler(tornado.web.RequestHandler):
 
         if message and len(message) < 100:
             print "PLAY MESSAGE", message
-            frames = TEXT_WRITER.get_all_frames(message, color)
-            pt = PlayAnimationThread(frames)
+            pt = PlayAnimationThread(message=message, color=color)
             pt.start()
             self.set_header("Content-Type", "application/json")
             self.write('ok')
@@ -168,16 +167,26 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
             
 
 class PlayAnimationThread(threading.Thread):
-    def __init__(self, frames):
+    def __init__(self, frames=None, message=None, color=None):
         self.frames = frames
+        self.message = message
+        self.color = color
         super(PlayAnimationThread, self).__init__()
 
     def run(self):
-        print "PlayAnimationThread: playing animation with %s frames." % len(self.frames)
-        for frame in self.frames:
-            p = DL_COMMUNICATOR.encode_full_frame(frame[0])
-            DL_COMMUNICATOR.send(p)
-            time.sleep(float(frame[1]))
+        if self.frames:
+            print "PlayAnimationThread: playing animation with %s frames." % len(self.frames)
+            for frame in self.frames:
+                p = DL_COMMUNICATOR.encode_full_frame(frame[0])
+                DL_COMMUNICATOR.send(p)
+                time.sleep(float(frame[1]))
+        else:
+            print "PlayAnimationThread: playing a message %s" % self.message
+            for frame in TEXT_WRITER.get_all_frames(self.message, self.color):
+                p = DL_COMMUNICATOR.encode_full_frame(frame[0])
+                DL_COMMUNICATOR.send(p)
+                time.sleep(float(frame[1]))
+
         print "PlayAnimationThread: animation done."
 
 
