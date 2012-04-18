@@ -15,10 +15,8 @@ class TextWriter(object):
             for i, b in enumerate(bits):
                 if b:
                     pixel_index = offset + i % self.alphabet_letter_width + i / self.alphabet_letter_width * frame_width
-                    # TODO: hardcoded channels
-                    frame[pixel_index * self.channels] = color[0]
-                    frame[pixel_index * self.channels + 1] = color[1]
-                    frame[pixel_index * self.channels + 2] = color[2]
+                    for ci in xrange(0, self.channels):
+                        frame[pixel_index * self.channels + ci] = color[ci]
 
 
 #            for i in xrange(offset, len(data_structure) / self.channels):
@@ -32,9 +30,10 @@ class TextWriter(object):
         frames = []
         message = message.lower()
         if len(message) > 20: message = message[:17] + "..."
+        message += " "
 
         # build one big image that contains all the letters
-        big_image = [0] *self.panel_width * self.panel_height * self.channels * (len(message) + 1)
+        big_image = [0] *self.panel_width * self.panel_height * self.channels * len(message)
         for i, l in enumerate(message):
             self.write(l, big_image, self.panel_width * len(message), offset=self.panel_width * i, color=color)
 
@@ -49,7 +48,7 @@ class TextWriter(object):
         # big image is ready, now return small frames from it, one per x-pixel
         offset = 0
         print "size of big image", len(big_image)
-        for i in xrange(0, self.panel_width * len(message)):
+        for i in xrange(0, self.panel_width * (len(message) - 1)):
             frame = [0] * self.panel_width * self.panel_height * self.channels
             print "frame with offset", offset
             for yi in xrange(0, self.panel_height):
@@ -57,10 +56,8 @@ class TextWriter(object):
                     pixel_index = (offset + xi) + yi * self.panel_width * len(message)
                     frame_pixel_index = xi + yi * self.panel_width
                     print "pi", pixel_index, "fpi", frame_pixel_index
-                    # TODO: hardcoded channels
-                    frame[frame_pixel_index * self.channels]        = big_image[pixel_index * self.channels]
-                    frame[frame_pixel_index * self.channels + 1]    = big_image[pixel_index * self.channels + 1]
-                    frame[frame_pixel_index * self.channels + 2]    = big_image[pixel_index * self.channels + 2]
+                    for ci in xrange(0, self.channels):
+                        frame[frame_pixel_index * self.channels + ci] = big_image[pixel_index * self.channels + ci]
             frames.append((frame, 0.1))
             offset += 1
         # create one frame for each letter in the message
