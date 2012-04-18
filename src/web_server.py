@@ -43,30 +43,6 @@ class TextHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/text.html")
 
-
-class PlayMessageHandler(tornado.web.RequestHandler):
-    def post(self):
-        args = self.request.arguments
-        message = args['message'][0]
-        color = args['color[]']
-        for i, c in enumerate(color): color[i] = int(c)
-
-        print "MESSAGE COLOR:", color
-        user_data = create_user_fingerprint(self.request)
-        # ANALYTICS.text_messaged({'msg': message, 'color': c}, user_data)
-
-        if message and len(message) < 100:
-            print "PLAY MESSAGE", message
-            pt = PlayAnimationThread(message=message, color=color)
-            pt.start()
-            self.set_header("Content-Type", "application/json")
-            self.write('ok')
-            print "RETURNED FROM PT"
-        else:
-            self.set_header("Content-Type", "application/json")
-            self.write('fail: no message or message too long')
-    
-
 class PanelPressedHandler(tornado.web.RequestHandler):
     def post(self):
         args = self.request.arguments
@@ -202,6 +178,17 @@ class SocketIOUpdaterConnection(SocketConnection):
         packet = DL_COMMUNICATOR.encode_partial_frame(x, y, c)
         DL_COMMUNICATOR.send(packet)
 
+    @event
+    def text_message(self, message, color):
+        print "MESSAGE COLOR:", color
+        user_data = create_user_fingerprint(self.request)
+        # ANALYTICS.text_messaged({'msg': message, 'color': c}, user_data)
+
+        print "PLAY MESSAGE", message
+        pt = PlayAnimationThread(message=message, color=color)
+        pt.start()
+
+
     def on_open(self, msg):
         print "web_server: socketio opened", msg
         global SOCKET_IO_CONNECTIONS, ANALYTICS
@@ -229,7 +216,6 @@ application = tornado.web.Application([
     (r"/animate/",              AnimateHandler),
     (r"/text/",                 TextHandler),
     
-    (r"/a/message",             PlayMessageHandler),
     (r"/a/press",               PanelPressedHandler),
     (r"/a/update",              PanelUpdateHandler),
     (r"/a/save-animation",      SaveAnimationHandler),

@@ -98,11 +98,11 @@
         $('#send-button').click(function(e) {
             var txt = $('#message').val();
             if(txt) {
-                if(txt.length > 100) {
-                    alert('Please keep the message length to under 100 characters. Thanks.');
+                if(txt.length > 20) {
+                    alert('Please keep the message length to under 20 characters. Thanks.');
                     return;
                 }
-                $.post('/a/message', {message: txt, color: panelInteraction.activeColor});
+                socketIOPanelUpdater.socket.emit('text_message', {'message': txt, 'c': panelInteraction.activeColor} );
             }
         });
     });
