@@ -135,14 +135,16 @@ var panelInteraction = {
     },
     
     colorSelectionHandler: function(e) {
-        $(this).parent().find('div').removeClass('active');
-        $(this).addClass('active');
+        $('div.color-selection').find('div').removeClass('active');
+        // set all the color selection divs active
+        var klass = $(this).attr('class');
+        $('div.color-selection div.'+klass).addClass('active');
+        // read the active color
         var s = $(this).css('background-color');
         s = s.replace(' ', '');
         s = s.split('(')[1].split(')')[0];
         var colors = s.split(',');
         panelInteraction.activeColor = [parseInt(colors[0]), parseInt(colors[1]), parseInt(colors[2])];
-        log(panelInteraction.activeColor);
     },
     
     playAnimation: function(title) {

@@ -66,43 +66,61 @@
     /** The "main" */
     $(function() {
 
+        var TEXT_EVENTS_BOUND = false;
+        var DRAW_EVENTS_BOUND = false;
+        var ANIMATE_EVENTS_BOUND = false;
+
+        $(window).bind('resize', function() {
+           $('table.panel td').each(function(i, e) { $(e).height($(e).width()); });
+        });
+
         $('div#animate').bind('pageshow', function() {
-            log('page! anim')
             panelInteraction.unBindAll();
             panelInteraction.bind('#animate-panel', true, animation.panelChangedCallback);
+            if(!ANIMATE_EVENTS_BOUND) {
+                // Events for the animation view
+                animation.init();
+                ANIMATE_EVENTS_BOUND = true;
+            }
+            $(window).resize();
         });
         $('div#draw').bind('pageshow', function() {
-            log('page! dar')
             panelInteraction.unBindAll();
             panelInteraction.bind("#draw-panel");
             socketIOPanelUpdater.bind("#draw-panel");
+
+            if(!DRAW_EVENTS_BOUND) {
+                // Events for the live drawing view
+                $('#saved-animations div').bind("click touchstart",
+                        function(e) {
+                            e.preventDefault();
+                            var t = $(this).attr('animation-title');
+                            panelInteraction.playAnimation(t);
+                        });
+                DRAW_EVENTS_BOUND = true;
+            }
+            $(window).resize();
         });
         $('div#text').bind('pageshow', function() {
-            log('page! tex')
             panelInteraction.unBindAll();
             socketIOPanelUpdater.bind('#text-panel');
-        });
 
-
-        // Events for the live drawing view
-        $('#saved-animations div').click(function(e) {
-            e.preventDefault();
-            var t = $(this).attr('animation-title');
-            panelInteraction.playAnimation(t);
-        });
-
-        // Events for the animation view
-        animation.init();
-
-        // Events for the text sending
-        $('#send-button').click(function(e) {
-            var txt = $('#message').val();
-            if(txt) {
-                if(txt.length > 20) {
-                    alert('Please keep the message length to under 20 characters. Thanks.');
-                    return;
-                }
-                socketIOPanelUpdater.socket.emit('text_message', {'message': txt, 'c': panelInteraction.activeColor} );
+            if(!TEXT_EVENTS_BOUND) {
+                // Events for the text sending
+                // bind the color selectors here (yeah, i know, ugly)
+                $('.color-selection div').click(panelInteraction.colorSelectionHandler);
+                $('#send-button').bind("click touchstart",
+                        function(e) {
+                            var txt = $('#message').val();
+                            if(txt) {
+                                if(txt.length > 40) {
+                                    alert('Please keep the message length to under 40 characters. Thanks.');
+                                    return;
+                                }
+                                socketIOPanelUpdater.socket.emit('text_message', {'message': txt, 'c': panelInteraction.activeColor} );
+                            }
+                        });
+                TEXT_EVENTS_BOUND = true;
             }
         });
     });

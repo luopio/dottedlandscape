@@ -44,7 +44,7 @@ var animation = {
         log('frame of len ' + frameLength)
         var $thumb = $('#animate-panel').clone();
         $thumb.attr('id', '').data('duration', frameLength).addClass('inline');
-        $thumb.find('td').data('x', '').data('y', '');
+        $thumb.find('td').data('x', '').data('y', '').height("0.2cm");
         $thumb.css('display', 'inline-block');
         $thumb.click(animation.frameSelectedEvent);
         $('div#add-frame').before($thumb);        

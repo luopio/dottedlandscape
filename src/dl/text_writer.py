@@ -19,34 +19,28 @@ class TextWriter(object):
                         frame[pixel_index * self.channels + ci] = color[ci]
 
 
-#            for i in xrange(offset, len(data_structure) / self.channels):
-#                for ii, c in enumerate(color):
-#                    data_structure[i * self.channels + ii] = bits[i] * int(c)
-        # return frame
-
-
     def get_all_frames(self, message, color=[255, 0, 0]):
         message = message.lower()
-        if len(message) > 20: message = message[:17] + "..."
-        message += " "
+        if len(message) > 40: message = message[:37] + "..."
+        message = " " + message + " "
 
         # build one big image that contains all the letters
-        big_image = [0] *self.panel_width * self.panel_height * self.channels * len(message)
+        big_image = [0] * (self.panel_width + 1) * self.panel_height * self.channels * len(message)
         for i, l in enumerate(message):
-            self.write(l, big_image, self.panel_width * len(message), offset=self.panel_width * i, color=color)
+            self.write(l, big_image, (self.panel_width + 1) * len(message), offset=(self.panel_width + 1) * i, color=color)
 
         # big image is ready, now return small frames from it, one per x-pixel
         offset = 0
         frame = [0] * self.panel_width * self.panel_height * self.channels
-        for i in xrange(0, self.panel_width * (len(message) - 1)):
+        for i in xrange(0, (self.panel_width + 1) * len(message) - self.panel_width):
             for yi in xrange(0, self.panel_height):
                 for xi in xrange(0, self.panel_width):
-                    pixel_index = (offset + xi) + yi * self.panel_width * len(message)
+                    pixel_index = (offset + xi) + yi * (self.panel_width + 1) * len(message)
                     frame_pixel_index = xi + yi * self.panel_width
                     for ci in xrange(0, self.channels):
                         frame[frame_pixel_index * self.channels + ci] = big_image[pixel_index * self.channels + ci]
             # frames.append((frame, 0.1))
-            yield (frame, 0.1)
+            yield (frame, 0.06)
             offset += 1
 
 

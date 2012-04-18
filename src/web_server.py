@@ -179,13 +179,13 @@ class SocketIOUpdaterConnection(SocketConnection):
         DL_COMMUNICATOR.send(packet)
 
     @event
-    def text_message(self, message, color):
-        print "MESSAGE COLOR:", color
-        user_data = create_user_fingerprint(self.request)
+    def text_message(self, message, c):
+        print "MESSAGE COLOR:", c
+        # user_data = create_user_fingerprint(self.request)
         # ANALYTICS.text_messaged({'msg': message, 'color': c}, user_data)
 
         print "PLAY MESSAGE", message
-        pt = PlayAnimationThread(message=message, color=color)
+        pt = PlayAnimationThread(message=message, color=c)
         pt.start()
 
 

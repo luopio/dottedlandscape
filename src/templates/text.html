@@ -18,25 +18,18 @@
     </div>
     <div data-role="content">
 
-        <div id="color" class="color-selection">
-            <!--
-             <div style="background:rgb(255, 255, 0);"></div>
-            <div style="background:rgb(255, 255, 255);"></div>
-            <div style="background:rgb(0, 255, 255);"></div>
-            -->
-            <div class="active" style="background:rgb(255, 0, 0);"></div>
-            <div style="background:rgb(255, 255, 0);"></div>
-            <div style="background:rgb(0, 255, 255);"></div>
-            <div style="background:rgb(255, 0, 255);"></div>
-            <div style="background:rgb(255, 255, 255);"></div>
-            <div style="background:rgb(0, 255, 0);"></div>
-            <div style="background:rgb(0, 0, 255);"></div>
-            <div style="background:rgb(0, 0, 0);"></div>
+        <div id="color-selection-text" class="color-selection">
+            <div class="active r" style="background:rgb(255, 0, 0);"></div>
+            <div class="y" style="background:rgb(255, 255, 0);"></div>
+            <div class="c" style="background:rgb(0, 255, 255);"></div>
+            <div class="v" style="background:rgb(255, 0, 255);"></div>
+            <div class="g" style="background:rgb(0, 255, 0);"></div>
+            <div class="b" style="background:rgb(0, 0, 255);"></div>
         </div>
 
         <div id="message-sending">
             <form action="" method="">
-                <input type="text" name="message" id="message"/>
+                <input type="text" name="message" id="message" size=40 maxlength="40"/>
                 <input type="button" value="send" id="send-button"/>
             </form>
         </div>
