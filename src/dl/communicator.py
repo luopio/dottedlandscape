@@ -48,13 +48,13 @@ class DottedLandscapeCommunicator(object):
         
         # this is a blip package or dl full frame (identical for now)
         if header_data[0] == self.blip_MAGIC_MCU_FRAME or header_data[0] == self.dl_MAGIC_FRAME_FULL:
-            print "full frame decoded: ", header_data[1:3]
+            # print "full frame decoded: ", header_data[1:3]
             if self.panel_width != header_data[2] or self.panel_height != header_data[1]:
                 self.define_panel(header_data[2], header_data[1], header_data[3])
             payload_data = self.full_frame_data_struct.unpack(data[12:])
         
         elif header_data[0] == self.dl_MAGIC_FRAME_PARTIAL:
-            print "partial frame decoded: ", header_data[1:3]
+            # print "partial frame decoded: ", header_data[1:3]
             if self.panel_width != header_data[2] or self.panel_height != header_data[1]:
                 self.define_panel(header_data[2], header_data[1], header_data[3])
             payload_data = self.partial_frame_data_struct.unpack(data[12:])

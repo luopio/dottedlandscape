@@ -42,6 +42,9 @@ class AnimateHandler(tornado.web.RequestHandler):
 class TextHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/text.html")
+class MeemooHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("templates/meemoo_connection.html")
 
 class PanelPressedHandler(tornado.web.RequestHandler):
     def post(self):
@@ -211,11 +214,12 @@ settings = {
 }
 
 application = tornado.web.Application([
-    (r"/",                      LiveHandler),
-    (r"/draw/",                 DrawHandler),
-    (r"/animate/",              AnimateHandler),
-    (r"/text/",                 TextHandler),
-    
+    (r"/",                  LiveHandler),
+    (r"/draw/",             DrawHandler),
+    (r"/animate/",          AnimateHandler),
+    (r"/text/",             TextHandler),
+    (r"/meemoo/",           MeemooHandler),
+
     (r"/a/press",               PanelPressedHandler),
     (r"/a/update",              PanelUpdateHandler),
     (r"/a/save-animation",      SaveAnimationHandler),

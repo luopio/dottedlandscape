@@ -15,27 +15,32 @@ Will work on Linux, probably on Mac, not likely on Windows.
 .. _Python: http://www.python.org
 .. _Arduino: http://www.arduino.cc
 
+QUICKSTART
+----------
 
-SERVER
-------
-blip_receiver.py - a class that understands the Blip-protocol from the Blinkenlights-project_
-pygame_ledpanel.py - listens for incoming Blip-packets through BlipReceiver and visualizes
-them with the help of PyGame-library_
+1. Download the code and install the dependencies
+  - gevent library (pip install gevent)
+  - tornado web server (pip install tornado)
+  - tornadio addition for socket.io support (pip install tornadio2)
 
-.. _Blinkenlights-project: http://blinkenlights.net/
-.. _PyGame-library: http://www.pygame.org/
+2. navigate into the src-directory
 
-Quick instructions:
+3. start panel_server (python panel_server.py)
+  - this starts the central panel server
 
-#. Download the Blip-library from the Blinkenlights project to build a Blip-sender host or use your own.
+4. start the web frontend (python web_server.py)
+  - this provides the web access to control the panel
 
-#. Go to the server directory and run python pygame_ledpanel.py. It will start listening on all available interfaces
+5. navigate to localhost:8888 to play around
 
-#. Run your Blip-sender (e.g. with the Blip-library: tests/test-movie-player movies/camel-18x8.blm 127.0.0.1)
+6. optionally start other components:
+  - python osc_router.py to forward draw commands to Open Sound Control
+  - python serial_connection.py to send commands via serial to something like an Arduino microcontroller
+  - python pygame_ledpanel.py to show a quick panel that listens to any changes and displays them
 
-#. Watch in awe as the camel moves on your screen
 
+CONNECTING BLINKENLIGHTS COMPONENTS
+-----------------------------------
 
-ARDUINO
--------
-...
+Unfortunately right now adding BL listeners is a bit harder. You need to hardcode them into
+panel_server.py (just add to notify_clients). A command line switch needs to be added later.

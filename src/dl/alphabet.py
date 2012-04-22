@@ -514,6 +514,8 @@ u'ö':'''
 
 }
 
+# TODO: add '(' ')' ':' ';'
+
 ALPHABET_BITS = {}
 for letter, values in ALPHABET_GRAPHICS.items():
     arr = []

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Dotted Landscape - Meemoo connection</title>
+    <meta name="author" content="Lauri Kainulainen">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="apple-touch-icon-114x114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="apple-touch-icon-72x72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="apple-touch-icon-precomposed.png">
+    <script src="{{ static_url('js/libs/modernizr-1.7.min.js') }}"></script>
+</head>
+
+<body>
+
+
+"This page was intentionally left blank"
+
+
+
+
+<script src="{{ static_url('js/libs/jquery-1.6.4.min.js') }}"></script>
+<script src="{{ static_url('js/libs/socket.io.js') }}"></script>
+<script type="text/javascript">
+    WEB_SOCKET_SWF_LOCATION = "{{ static_url('js/libs/WebSocketMain.swf') }}";
+</script>
+<script src="{{ static_url('js/log.js') }}"></script>
+<script src="{{ static_url('js/dottedlandscape.js') }}"></script>
+
+<script src="http://meemoo.org/meemoo/v1/meemoo-min.js"></script>
+
+<script type="text/javascript">
+
+    function onPanelData(data) {
+        Meemoo.send("full_frame", data);
+    }
+
+    $(function() {
+
+        // connect to the Dotted Landscape web server
+        // socket io to send and receive panel updates
+        var IO = io.connect('/');
+        IO.on('dl_panel_data', onPanelData);
+
+        Meemoo
+            .setInfo({
+                title: "Dotted Landscape",
+                author: "luopio",
+                description: "Connection between DL and Meemoo"
+            })
+            .addInputs({
+                // update the whole frame, takes an array of 8 * 8 * 3 ints (0-255)
+                // not implemented yet on the web side
+                /*full_frame: {
+                    action: function (n) {
+                        // Meemoo.send("squared", n*n);
+
+                    },
+                    type: "array"
+                },*/
+                // update one pixel
+                partian_frame: {
+                    action: function (arr) {
+                        var x = arr[0], y = arr[1], r = arr[2], g = arr[3], b = arr[4];
+                        IO.emit('panel_press', {'x': x, 'y': y, 'c': [r, g, b]} );
+                    },
+                    type: "string"
+                }
+            })
+            .addOutputs({
+                full_frame: {
+                    type: "array" // is this a type? 8 * 8 * 3 ints (0-255)
+                }
+            });
+
+    });
+</script>
+
+</body>
+</html>
