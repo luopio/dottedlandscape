@@ -89,7 +89,6 @@ if __name__ == '__main__':
             now = time.time()
             if now - last_packet_received > idle_time:
                 if tbl:
-                    print "game of life!"
                     alive, tbl = game_of_life(tbl, dlc.panel_width, dlc.panel_height)
                     frame = []
                     for i in tbl:
@@ -112,15 +111,10 @@ if __name__ == '__main__':
                 ss = -1
             # quick checksum to see if the frame changed or was blank
             if s == ss or s == 0:
-                print "it was ours!"
+                pass
             else:
-                print "activity!"
-                print "lastframe", last_frame
-                print "payload: ", payload
-                print
-                tbl = None # refresh next time
-
                 last_packet_received = time.time()
+
             if not tbl:
                 tbl = shuffle_table(dlc)
                 color = get_random_color()
