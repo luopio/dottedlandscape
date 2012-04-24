@@ -37,7 +37,6 @@ void loop()
       }
     }
       
-    // ledMatrix.clear();
     //redMatrix.clear();
     //blueMatrix.clear();
     //greenMatrix.clear();
@@ -105,8 +104,6 @@ void loop()
   }
   
   Serial.flush();
-  delay(100);    
-  
-
+  delay(100);      
 }
 
