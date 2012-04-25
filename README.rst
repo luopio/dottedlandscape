@@ -18,7 +18,7 @@ Will work on Linux, probably on Mac, not likely on Windows.
 QUICKSTART
 ----------
 
-  1. Download the code and install the dependencies
+1. Download the code and install the dependencies
     - gEvent library: provides co-routines for the central server
     - Tornado web server: asynchronous communication for the web frontend
     - TornadIO2 addition: socket.io support for Tornado (NB: use v2)
@@ -26,20 +26,19 @@ QUICKSTART
     - on Linux (Debian variant) these steps might be completed with
       something like:
 
-      $ sudo apt-get install python-dev python-setuptools libevent-dev && \
-        sudo easy_install tornado tornadio2 gevent redis
+    $ sudo apt-get install python-dev python-setuptools libevent-dev && sudo easy_install tornado tornadio2 gevent redis
 
-  2. navigate into the src-directory
+2. navigate into the src-directory
 
-  3. start panel_server (python panel_server.py)
+3. start panel_server (python panel_server.py)
     - this starts the central panel server
 
-  4. start the web frontend (python web_server.py)
+4. start the web frontend (python web_server.py)
     - this provides the web access to control the panel
 
-  5. navigate to localhost:8888 to play around
+5. navigate to localhost:8888 to play around
 
-  6. optionally start other components:
+6. optionally start other components:
     - python osc_router.py to forward draw commands to Open Sound Control
     - python serial_connection.py to send commands via serial to something like an Arduino microcontroller
     - python pygame_ledpanel.py to show a quick panel that listens to any changes and displays them
