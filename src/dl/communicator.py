@@ -105,7 +105,7 @@ class DottedLandscapeCommunicator(object):
             data = self.receive_socket.recv(4096)
             headers, payload = self.decode(data)
             if not headers:
-                return None
+                return None, None
             
             if headers[0] in (self.blip_MAGIC_MCU_FRAME, self.dl_MAGIC_FRAME_FULL, self.dl_MAGIC_FRAME_PARTIAL):
                 # print "DLCOMM >> valid frame found"
@@ -113,7 +113,7 @@ class DottedLandscapeCommunicator(object):
                 return headers, payload
         except socket.error:
             pass # print "DLCOMM >> nothing to receive?"
-        return None
+        return None, None
         
 
     def connect(self, host, port, accept_partial_frames=False):
