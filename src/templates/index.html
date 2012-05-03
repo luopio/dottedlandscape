@@ -71,10 +71,11 @@
         var ANIMATE_EVENTS_BOUND = false;
 
         $(window).bind('resize', function() {
-           $('table.panel td').each(function(i, e) { $(e).height($(e).width()); });
+            $('table.panel td').each(function(i, e) { $(e).height($(e).width()); });
         });
 
         $('div#animate').bind('pageshow', function() {
+            $(window).resize();
             panelInteraction.unBindAll();
             panelInteraction.bind('#animate-panel', true, animation.panelChangedCallback);
             if(!ANIMATE_EVENTS_BOUND) {
@@ -82,9 +83,9 @@
                 animation.init();
                 ANIMATE_EVENTS_BOUND = true;
             }
-            $(window).resize();
         });
         $('div#draw').bind('pageshow', function() {
+            $(window).resize();
             panelInteraction.unBindAll();
             panelInteraction.bind("#draw-panel");
             socketIOPanelUpdater.bind("#draw-panel");
@@ -99,7 +100,6 @@
                         });
                 DRAW_EVENTS_BOUND = true;
             }
-            $(window).resize();
         });
         $('div#text').bind('pageshow', function() {
             panelInteraction.unBindAll();
