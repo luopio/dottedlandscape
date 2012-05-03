@@ -27,12 +27,13 @@ void loop()
 {
   if (Serial.available() > 0) 
   {
-    // look for the header byte that should be 0
-    // used for syncing
+    // Look for the header byte that is a fixed value.
+    // This assures we begin the reading the values in the
+    // right spot.
     while(Serial.available()) 
     {
       headerByte = Serial.read();
-      if(headerByte == 255) {
+      if(headerByte == 13) {
         break;
       }
     }
@@ -49,20 +50,8 @@ void loop()
       greenByte = Serial.read();
       blueByte = Serial.read();
       
-      // mind bogling 1..0 indexing!
-      // first byte for is for the red row
+      // reverting the coordinates for turned panel (when on pedestal)
       /*
-      ledMatrix.write(1, y, redByte & 1);
-      ledMatrix.write(2, y, redByte & 2);
-      ledMatrix.write(3, y, redByte & 4);
-      ledMatrix.write(4, y, redByte & 8);
-      ledMatrix.write(5, y, redByte & 16);
-      ledMatrix.write(6, y, redByte & 32);
-      ledMatrix.write(7, y, redByte & 64);
-      ledMatrix.write(0, y, redByte & 128);
-      */
-      
-      // reverting the coordinates for turned panel
       if(y == 0) {
         yr = 1;
       } else if(y == 7) {
@@ -70,7 +59,10 @@ void loop()
       } else {
         yr = y + 1;
       }
+      */
       
+      // mind bogling 1..0 indexing!
+      // first byte for is for the red row
       redMatrix.write(yr, 7, redByte & 1);
       redMatrix.write(yr, 6, redByte & 2);
       redMatrix.write(yr, 5, redByte & 4);
@@ -104,6 +96,6 @@ void loop()
   }
   
   Serial.flush();
-  delay(100);      
+  // delay(100);      
 }
 
