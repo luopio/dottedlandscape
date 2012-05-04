@@ -127,61 +127,13 @@
 </script>
 <script src="{{ static_url('js/libs/jquery.mobile-1.0.1.min.js') }}"></script>
 
-<!--
 
-<script type="text/javascript">
-    $(function() {
-
-
-        // Write the default value on startup
-        $('div#frame-options h2 span').text($('#slider').slider('value'));
-
-
-    });
-</script>
--->
-<!-- FIXME: proper account settings -->
 <script>
-    //var _gaq=[["_setAccount","UA-XXXXX-X"],["_trackPageview"]];
-    //(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
-    //g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
-    //s.parentNode.insertBefore(g,s)}(document,"script"));
+    var _gaq=[["_setAccount","UA-23620841-2"],["_trackPageview"]];
+    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];g.async=1;
+        g.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";
+        s.parentNode.insertBefore(g,s)}(document,"script"));
 </script>
 
-<!--
-<script type="text/javascript">
-    $(function() {
-        // no input
-        // panelInteraction.init();
-
-        // output
-        var ACTIVE_COLOR = [255, 0, 0];
-
-        $('div.color-selection div').click(function(e) {
-            $(this).parent().find('div').removeClass('active');
-            $(this).addClass('active');
-            var s = $(this).css('background-color');
-            s = s.replace(' ', '');
-            s = s.split('(')[1].split(')')[0];
-            var colors = s.split(',');
-            ACTIVE_COLOR = [parseInt(colors[0]), parseInt(colors[1]), parseInt(colors[2])];
-            console.log(ACTIVE_COLOR)
-        })
-
-        panelUpdater.init();
-        $('#send-button').click(function(e) {
-            var txt = $('#message').val();
-            if(txt) {
-                if(txt.length > 100) {
-                    alert('Please keep the message length to under 100 characters. Thanks.');
-                    return;
-                }
-                $.post('/a/message', {message: txt, color: ACTIVE_COLOR});
-            }
-        })
-
-    });
-</script>
--->
 </body>
 </html>
