@@ -4,25 +4,28 @@ import serial, struct, time
 from dl.communicator import DottedLandscapeCommunicator
 
 class SerialConnection(object):
+    ''' The SerialConnection class sends data through the serial port to the
+        Arduino. The size of the panel is restricted here because we pack each
+        row in a channel into one byte (8 bits, on/off). This sets the column
+        amount to 8. Changing this should not be too hard if the electronics
+        accept different forms in the future. '''
+
     ser = None
     
-    def __init__(self):
+    def __init__(self, rows, channels):
         # Arduino is little endian
-        self.full_frame_struct = struct.Struct('<B' + 'B' * 8 * 3) # one byte per row, per channel 
-    
+        self.full_frame_struct = struct.Struct('<B' + 'B' * rows * channels) # one byte per row, per channel
+
+
     def connect(self):
         try:
-            # ttyACM0
             self.ser = serial.Serial('/dev/ttyACM0', 19200)
         except:
             self.ser = serial.Serial('/dev/ttyACM1', 19200)
-        # self.ser.setTimeout(0.8)
-        # line = self.ser.read(58)
-        # print "msg >", line
-    
 
-    def write(self, data):
-        self.ser.write(self.full_frame_struct.pack(255, *data))
+
+    def write(self, data, checksum):
+        self.ser.write(self.full_frame_struct.pack(checksum, *data))
         
     
     def close(self):
@@ -33,25 +36,25 @@ class SerialConnection(object):
             
 
 if __name__ == '__main__':
-    # foo = 'a'
-    # while foo != 'q':
-    #     foo = raw_input('> ')
-    #     sc.write([int(foo) for i in xrange(0, 8)])
-    # sc.close()
-    
-    
-    sc = SerialConnection()
-    sc.connect()
+
     dlc = DottedLandscapeCommunicator()
     dlc.connect('127.0.0.1', 2323)
-    
 
-    done = False 
+    print "waiting for panel size information.."
+    while dlc.panel_height == None:
+        dlc.check_for_data()
+        time.sleep(0.1)
+
+    print "received panel data (%s x %s x %s)" % (dlc.panel_width, dlc.panel_height, dlc.channels)
+    sc = SerialConnection(dlc.panel_height, dlc.channels)
+    sc.connect()
+
+    done = False
     while not done:
         # get any incoming data from the DL server
         _, data = dlc.check_for_data()
         if data:     # new frame received!
-            print "frame!", len(data)
+            print "serial connection received a frame of length %s!" % len(data)
             
             # data format r, g, b, r, g, b, r, g, b, r, g, b, r, g, b, etc.. 
             i = 0
@@ -78,7 +81,8 @@ if __name__ == '__main__':
                 # x = (i / 3 % 8)
                 # y = (i / 3 / 8)
             print "sent %s of data" % len(frame)
-            sc.write(frame)
+            checksum = 13
+            sc.write(frame, checksum)
         else:
             # time.sleep(0.5)
             pass

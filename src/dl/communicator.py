@@ -26,7 +26,7 @@ class DottedLandscapeCommunicator(object):
         self.new_conn_data_struct = struct.Struct('!HHHHI') # ip.ip.ip.ip, port
         self.full_frame_data_struct = None # constructed on first contact, when we know size
         self.panel_changed_cb = panel_changed_callback
-        self.panel_width, self.panel_height = 0, 0
+        self.panel_width, self.panel_height = None, None
         self._cached_payload = None
 
 
@@ -145,7 +145,6 @@ class DottedLandscapeCommunicator(object):
         else:
             packet = self.encode_handshake(host, receive_port)
             self.send_socket.sendto(packet, 0, (host, port))
-            
 
     
     def disconnect(self):
