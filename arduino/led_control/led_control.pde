@@ -5,7 +5,6 @@
  Create a new Matrix instance to control the MAX7219
  data (din)  load (load)  clock (clk)
 */
-// Matrix ledMatrix = Matrix(10, 12, 11);
 
 Matrix blueMatrix = Matrix(10, 11, 12);
 Matrix greenMatrix = Matrix(2, 3, 4);
