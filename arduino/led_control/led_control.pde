@@ -50,8 +50,6 @@ void loop()
       greenByte = Serial.read();
       blueByte = Serial.read();
       
-      // reverting the coordinates for turned panel (when on pedestal)
-      /*
       if(y == 0) {
         yr = 1;
       } else if(y == 7) {
@@ -59,7 +57,7 @@ void loop()
       } else {
         yr = y + 1;
       }
-      */
+      
       
       // mind bogling 1..0 indexing!
       // first byte for is for the red row
@@ -96,6 +94,6 @@ void loop()
   }
   
   Serial.flush();
-  // delay(100);      
+  delay(150);      
 }
 
