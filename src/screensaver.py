@@ -84,8 +84,8 @@ if __name__ == '__main__':
     while not done:
 
         # get any incoming data from the DL server
-        data = dlc.check_for_data()
-        if not data:
+        headers, payload = dlc.check_for_data()
+        if not payload:
             now = time.time()
             if now - last_packet_received > idle_time:
                 if tbl:
@@ -103,7 +103,6 @@ if __name__ == '__main__':
                         color = get_random_color()
                         amount_of_frames_since_refresh = 0
         else:
-            headers, payload = data
             s = sum(payload)
             if last_frame:
                 ss = sum(last_frame)

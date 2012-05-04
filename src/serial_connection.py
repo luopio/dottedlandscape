@@ -59,20 +59,18 @@ if __name__ == '__main__':
             # data format r, g, b, r, g, b, r, g, b, r, g, b, r, g, b, etc.. 
             i = 0
             frame = []
-            while i < 8 * 8 * 3:
+            for y in xrange(0, 8):
                 red_value = 0
                 green_value = 0
                 blue_value = 0
-                for u in xrange(0, 8):
+                for x in xrange(0, 8):
+                    i = ((7 - x) * 8 + (y)) * 3
                     if data[i]:
-                        red_value += 1 << u
-                    i += 1
-                    if data[i]:
-                        green_value += 1 << u
-                    i += 1
-                    if data[i]:
-                        blue_value += 1 << u
-                    i += 1
+                        red_value += 1 << x
+                    if data[i + 1]:
+                        green_value += 1 << x
+                    if data[i + 2]:
+                        blue_value += 1 << x
                     
                 # print bin(red_value)
                 frame.append( red_value )

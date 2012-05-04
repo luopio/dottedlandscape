@@ -40,7 +40,7 @@ class TextWriter(object):
                     for ci in xrange(0, self.channels):
                         frame[frame_pixel_index * self.channels + ci] = big_image[pixel_index * self.channels + ci]
             # frames.append((frame, 0.1))
-            yield (frame, 0.06)
+            yield (frame, 0.15)
             offset += 1
 
 
