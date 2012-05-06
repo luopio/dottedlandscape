@@ -93,11 +93,11 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
         ip, port = payload_data[0], payload_data[1]
         if (ip, port, accept_partial_frames) not in self.receivers:
             print "dl_server: new listener at (%s, %s). Accepts partial frames? %s" % (ip, port, accept_partial_frames)
-            if self.__panel_data:
-                packet = self.encode_full_frame(self.__panel_data)
-                self.send_socket.sendto(packet, 0, (ip, port))
             self.receivers.append((ip, port, accept_partial_frames))
-    
+        if self.__panel_data:
+            packet = self.encode_full_frame(self.__panel_data)
+            self.send_socket.sendto(packet, 0, (ip, port))
+
     
     def notify_receivers(self, is_partial_frame=False):
         packet = self.encode_full_frame(self.__panel_data)

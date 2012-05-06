@@ -2,11 +2,72 @@ import random
 import time
 from dl.communicator import DottedLandscapeCommunicator
 
-def game_of_life(tbl, tbl_width, tbl_height):
+
+def knight_rider(tbl_width, tbl_height, vars):
+    if not vars.has_key('offset'):
+        vars['offset'] = int(random.random() * tbl_width)
+        vars['speed'] = 1
+        vars['frame_duration'] = 0.05
+        vars['total_frames'] = int(30 + 60 * random.random())
+        vars['inverted'] = True if random.random() > 0.5 else False
+
+    if vars['inverted']:
+        frame = vars['color'] * tbl_width * tbl_height
+        c = (0, 0, 0)
+    else:
+        frame = [0] * tbl_width * tbl_height * 3
+        c = vars['color']
+
+    for i in xrange(0, tbl_height):
+        frame[(i * tbl_width + vars['offset']) * 3]     = c[0]
+        frame[(i * tbl_width + vars['offset']) * 3 + 1] = c[1]
+        frame[(i * tbl_width + vars['offset']) * 3 + 2] = c[2]
+
+
+    vars['offset'] += vars['speed']
+    if vars['offset'] > tbl_width - 1:
+        vars['speed'] = -1
+        vars['offset'] = tbl_width - 1
+    elif vars['offset'] < 0:
+        vars['speed'] = 1
+        vars['offset'] = 0
+
+    if vars['frame_counter'] > vars['total_frames']:
+        return frame, False, vars
+
+    return frame, True, vars
+
+
+def random_colors(tbl_width, tbl_height, vars):
+    if not vars.has_key('total_frames'):
+        vars['total_frames'] = int(30 + 20 * random.random())
+    frame = []
+    if vars['color']:
+        for i in xrange(0, tbl_width * tbl_height):
+            frame += (vars['color'] if random.random() < 0.4 else [0, 0, 0]) # TODO: channels hardcoded here
+    else:
+        for i in xrange(0, tbl_width * tbl_height * 3): # TODO: channels hardcoded here
+            frame.append( 0 if random.random() < 0.8 else 255 )
+
+    if vars['frame_counter'] > vars['total_frames']:
+        return frame, False, vars
+
+    return frame, True, vars
+
+
+def game_of_life(tbl_width, tbl_height, vars):
+    if not vars.has_key('table'):
+        print "shuffle table"
+        tbl = [0] * dlc.panel_width * dlc.panel_height
+        for i, e in enumerate(tbl):
+            if random.random() < 0.3: tbl[i] = 1
+        vars['table'] = tbl
+        vars['frame_duration'] = 0.3
+
     new_tbl = [0] * tbl_width * tbl_height
     alive = False
-    for i, e in enumerate(tbl):
-        nn = number_of_neighbours(i, tbl, tbl_width, tbl_height)
+    for i, e in enumerate(vars['table']):
+        nn = number_of_neighbours(i, vars['table'], tbl_width, tbl_height)
         new_tbl[i] = e
         if e == 1:
             if nn > 3 or nn < 2:
@@ -15,7 +76,17 @@ def game_of_life(tbl, tbl_width, tbl_height):
             if nn == 3:
                 new_tbl[i] = 1
                 alive = True
-    return alive, new_tbl
+    frame = []
+    for i in new_tbl:
+        frame.append(vars['color'][0] * i)
+        frame.append(vars['color'][1] * i)
+        frame.append(vars['color'][2] * i)
+    vars['table'] = new_tbl
+
+    if vars['frame_counter'] > 50:
+        alive = False
+
+    return frame, alive, vars
 
 
 def number_of_neighbours(i, tbl, tbl_width, tbl_height):
@@ -49,14 +120,6 @@ def number_of_neighbours(i, tbl, tbl_width, tbl_height):
     return nn
 
 
-def shuffle_table(dlc):
-    print "shuffle"
-    tbl = [0] * dlc.panel_width * dlc.panel_height
-    for i, e in enumerate(tbl):
-        if random.random() < 0.3: tbl[i] = 1
-    return tbl
-
-
 def get_random_color():
     color = [0, 0, 0]
     if random.random() > 0.5:
@@ -71,38 +134,47 @@ def get_random_color():
         color[0] = 0
     return color
 
+
+def select_random_visualization():
+    visualization = random.choice([knight_rider, random_colors, game_of_life])
+    print "picked random viz:", visualization.__name__
+    vars = {'frame_duration': 0.35, 'frame_counter': 0}
+    vars['color'] = get_random_color()
+    if visualization == random_colors: #  and sum(vars['color']) > 255:
+        vars['color'] = None
+
+    return visualization, vars
+
+
 if __name__ == '__main__':
     dlc = DottedLandscapeCommunicator()
     dlc.connect('127.0.0.1', 2323)
     last_packet_received = 0
     done = False
-    tbl = None
-    color = [0, 255, 0]
     idle_time = 3
     last_frame = None
-    amount_of_frames_since_refresh = 0
-    while not done:
+    now = None
+    vars = {'frame_duration': 0.5, 'frame_counter': 0} # will be updated by the visualization algorithms
 
+    while not done:
         # get any incoming data from the DL server
         headers, payload = dlc.check_for_data()
-        if not payload:
+        if not payload and dlc.panel_width:
+
+            if now == None:
+                visualization, vars = select_random_visualization()
+
             now = time.time()
             if now - last_packet_received > idle_time:
-                if tbl:
-                    alive, tbl = game_of_life(tbl, dlc.panel_width, dlc.panel_height)
-                    frame = []
-                    for i in tbl:
-                        frame.append(color[0] * i)
-                        frame.append(color[1] * i)
-                        frame.append(color[2] * i)
-                    last_frame = frame
-                    dlc.send(dlc.encode_full_frame(frame))
-                    amount_of_frames_since_refresh += 1
-                    if not alive or amount_of_frames_since_refresh > 50:
-                        tbl = shuffle_table(dlc)
-                        color = get_random_color()
-                        amount_of_frames_since_refresh = 0
-        else:
+                frame, alive, vars = visualization(dlc.panel_width, dlc.panel_height, vars)
+                last_frame = frame
+                dlc.send(dlc.encode_full_frame(frame))
+                vars['frame_counter'] += 1
+
+                if not alive:
+                    visualization, vars = select_random_visualization()
+
+        elif payload:
             s = sum(payload)
             if last_frame:
                 ss = sum(last_frame)
@@ -114,12 +186,7 @@ if __name__ == '__main__':
             else:
                 last_packet_received = time.time()
 
-            if not tbl:
-                tbl = shuffle_table(dlc)
-                color = get_random_color()
-                amount_of_frames_since_refresh = 0
-
-        time.sleep(0.3)
+        time.sleep(vars['frame_duration'])
 
     dlc.disconnect()
 

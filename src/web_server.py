@@ -45,6 +45,11 @@ class TextHandler(tornado.web.RequestHandler):
 class MeemooHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/meemoo_connection.html")
+class EmbedHandler(tornado.web.RequestHandler):
+    def get(self):
+        global ANIMATIONSTORAGE
+        anims = ANIMATIONSTORAGE.get_all_animations()
+        self.render("templates/embed.html", saved_animations=anims)
 
 class PanelPressedHandler(tornado.web.RequestHandler):
     def post(self):
@@ -219,6 +224,7 @@ application = tornado.web.Application([
     (r"/animate/",          AnimateHandler),
     (r"/text/",             TextHandler),
     (r"/meemoo/",           MeemooHandler),
+    (r"/embed/",           EmbedHandler),
 
     (r"/a/press",               PanelPressedHandler),
     (r"/a/update",              PanelUpdateHandler),
@@ -246,4 +252,10 @@ if __name__ == "__main__":
     ioloopy.add_handler(DL_COMMUNICATOR.receive_socket.fileno(), 
                         notify_clients_on_panel_change,
                         ioloopy.READ | ioloopy.ERROR)
+
+    # Send one empty frame. This defines the panel so that other components
+    # get frame information and can start running
+    packet = DL_COMMUNICATOR.encode_partial_frame(0, 0, [0, 0, 0])
+    DL_COMMUNICATOR.send(packet)
+
     ioloopy.start()

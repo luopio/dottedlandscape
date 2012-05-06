@@ -1,7 +1,8 @@
-import tornado, redis, json
+import tornado, redis
 
 class AnimationStorage(object):
     prefix = 'dl_2_'
+    directory_key = 'dl_animation_directory'
 
     def __init__(self):
         self.r = redis.Redis()
@@ -9,7 +10,9 @@ class AnimationStorage(object):
 
     def save_animation_to_db(self, key, val):
         json = tornado.escape.json_encode(val)
-        self.r.set(self.prefix+key, json)
+        key = self.prefix+key, json
+        self.r.set(key)
+        self.r.sadd(self.directory_key, key)
 
 
     def load_animation_from_db(self, key):
@@ -19,10 +22,9 @@ class AnimationStorage(object):
     def get_all_animations(self):
         anims = []
         # TODO: should not use keys.. more so because of this quick hax
-        for k in self.r.keys(self.prefix+'*').split(self.prefix):
-            if not k: continue
-            j = json.loads(self.r.get(self.prefix+k))
-            # j = tornado.escape.json_decode(self.r.get(k))
-            anims.append((j['title'], j['author'], j['frames'][0]))
+        for k in self.r.smembers(self.directory_key):
+            j = tornado.escape.json_decode(self.r.get(k))
+            middle_frame = j['frames'][len(j['frames']) / 2]
+            anims.append((j['title'], j['author'], middle_frame))
         return anims
 

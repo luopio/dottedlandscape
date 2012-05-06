@@ -2,12 +2,49 @@
 
 /*
 ==|== primary styles =====================================================
-   Author:
+   Author: Lauri Kainulainen
 ==========================================================================
 */
 
+@font-face {
+    font-family: 'HeroRegular';
+    src: url('../fonts/hero-webfont.eot');
+    src: url('../fonts/hero-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/hero-webfont.woff') format('woff'),
+    url('../fonts/hero-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 
+}
+@font-face {
+    font-family: 'HeroLight';
+    src: url('../fonts/hero_light-webfont.eot');
+    src: url('../fonts/hero_light-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../fonts/hero_light-webfont.woff') format('woff'),
+    url('../fonts/hero_light-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
 
+}
+
+body {
+    background: #000009;
+    color: #f9f9f7;
+}
+
+.content-area {
+    max-width: 600px;
+    margin: 12px auto;
+    padding: 0 8px;
+}
+
+hgroup {
+    font-family: HeroRegular;
+    .content-area;
+    h1 {
+        font-weight: normal;
+    }
+}
 
 
 /* ==|== media queries ======================================================
