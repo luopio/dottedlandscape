@@ -41,7 +41,7 @@
         </table>
 
         <div id="frame-options">
-            <fieldset id="frame-length" data-role="controlgroup" data-type="horizontal">
+            <fieldset style="display: none;" id="frame-length" data-role="controlgroup" data-type="horizontal">
                 <input type="radio" name="frame-length" id="radio-choice-1" value="0.05"/>
                 <label for="radio-choice-1">0.05s</label>
 
@@ -73,10 +73,10 @@
         <div id="upload">
             <h3>Upload and Share Animation</h3>
             <label for="animation-title">Title</label>
-            <input type="text" name="animation-title" id="animation-title"/>
+            <input type="text" name="animation-title" id="animation-title" size=20 maxlength="20"/>
             <br/>
             <label for="animation-author">Author</label>
-            <input type="text" name="animation-author" id="animation-author"/>
+            <input type="text" name="animation-author" id="animation-author" size=20 maxlength="20"/>
             <br/>
             <a id="upload-button" data-role="button">Upload</a>
         </div>
@@ -90,9 +90,9 @@
         <p>
             Animation has been saved as
             <span></span>
-            on the server! You can now play it in the Paint view.
+            on the server! You can now play it in the Draw view.
         </p>
-        <a data-theme="a" data-rel="back" data-role="button" href="#draw">Go to the Paint view</a>
-        <a data-theme="a" data-rel="back" data-role="button" data-direction="reverse">Cancel</a>
+        <a data-theme="a" data-role="button" href="#draw">Go to the draw view</a>
+        <a data-theme="a" data-rel="back" data-role="button" data-direction="reverse">Return</a>
     </div>
 </div>

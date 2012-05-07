@@ -174,8 +174,10 @@ var animation = {
             function(data) {
                 //log('save animation: server said:' + data)
                 if(data && data.status == 'ok') {
+                    $('#animation-author').val('');
+                    $('#animation-title').val('');
                     $('#animation-saved-dialog').dialog('open');
-                }  
+                }
             }, 
             'json'
         );

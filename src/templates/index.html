@@ -71,7 +71,8 @@
         var ANIMATE_EVENTS_BOUND = false;
 
         $(window).bind('resize', function() {
-            $('table.panel td').each(function(i, e) { $(e).height($(e).width()); });
+            log('resized!')
+            $('table.panel:visible td').each(function(i, e) { $(e).height($(e).width()); });
         });
 
         $('div#animate').bind('pageshow', function() {
@@ -90,16 +91,40 @@
             panelInteraction.bind("#draw-panel");
             socketIOPanelUpdater.bind("#draw-panel");
 
-            if(!DRAW_EVENTS_BOUND) {
-                // Events for the live drawing view
-                $('#saved-animations div').bind("click touchstart",
-                        function(e) {
-                            e.preventDefault();
-                            var t = $(this).attr('animation-title');
-                            panelInteraction.playAnimation(t);
-                        });
-                DRAW_EVENTS_BOUND = true;
-            }
+
+            $.get('/a/get-all-animations', {}, function(data) {
+                $('#all-animations').empty();
+
+                $.each(data, function(i, d) {
+                    var $bp = $('#saved-animation-blueprint').clone();
+                    $bp.attr('id', '');
+                    $bp.attr('animation-title', d.title);
+                    $bp.find('span').html(d.title + " by <i>"+d.author+"</i>");
+
+                    var tbody = $bp.find('tbody');
+                    var tr = 0;
+                    for(i = 0; i < 192; i+=3) {
+                        var r = d.frame[0][i];
+                        var g = d.frame[0][i + 1];
+                        var b = d.frame[0][i + 2];
+                        if(i % 24 == 0) {
+                            if(tr) { tbody.append(tr); }
+                            tr = $(document.createElement('tr'));
+                        }
+                        td = $(document.createElement('td'));
+                        td.css('background-color', 'rgb('+r+','+g+','+b+')');
+                        tr.append(td)
+                    }
+                    $('#all-animations').append($bp);
+                    $bp.click(function(e) {
+                        e.preventDefault();
+                        var t = $(this).attr('animation-title');
+                        panelInteraction.playAnimation(t);
+                    });
+                    $bp.fadeIn();
+                });
+                log('done')
+            }, 'json');
         });
         $('div#text').bind('pageshow', function() {
             panelInteraction.unBindAll();
@@ -109,7 +134,14 @@
                 // Events for the text sending
                 // bind the color selectors here (yeah, i know, ugly)
                 $('.color-selection div').click(panelInteraction.colorSelectionHandler);
-                $('#send-button').bind("click touchstart",
+                $('#message').keydown(function(e) {
+                    log('key')
+                    if(e.keyCode == 13) {
+                        log('enter pressed')
+                        $('#send-button').click();
+                    }
+                })
+                $('#send-button').bind("click",
                         function(e) {
                             var txt = $('#message').val();
                             if(txt) {
@@ -118,6 +150,7 @@
                                     return;
                                 }
                                 socketIOPanelUpdater.socket.emit('text_message', {'message': txt, 'c': panelInteraction.activeColor} );
+                                $('#message').val('');
                             }
                         });
                 TEXT_EVENTS_BOUND = true;

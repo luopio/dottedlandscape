@@ -30,9 +30,7 @@ def create_user_fingerprint(req):
 # Template handlers
 class LiveHandler(tornado.web.RequestHandler):
     def get(self):
-        global ANIMATIONSTORAGE
-        anims = ANIMATIONSTORAGE.get_all_animations()
-        self.render("templates/index.html", saved_animations=anims)
+        self.render("templates/index.html")
 class DrawHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("templates/draw.html")
@@ -47,9 +45,7 @@ class MeemooHandler(tornado.web.RequestHandler):
         self.render("templates/meemoo_connection.html")
 class EmbedHandler(tornado.web.RequestHandler):
     def get(self):
-        global ANIMATIONSTORAGE
-        anims = ANIMATIONSTORAGE.get_all_animations()
-        self.render("templates/embed.html", saved_animations=anims)
+        self.render("templates/embed.html")
 
 class PanelPressedHandler(tornado.web.RequestHandler):
     def post(self):
@@ -148,7 +144,17 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
         if a:
             pt = PlayAnimationThread(a['frames'])
             pt.start()
-            
+
+
+class GetAllAnimationsHandler(tornado.web.RequestHandler):
+        def get(self):
+            global ANIMATIONSTORAGE
+            a = ANIMATIONSTORAGE.get_all_animations()
+            print "got anims", a
+            json = tornado.escape.json_encode(a)
+            self.write(json)
+            print "wrote json", json
+
 
 class PlayAnimationThread(threading.Thread):
     def __init__(self, frames=None, message=None, color=None):
@@ -230,6 +236,7 @@ application = tornado.web.Application([
     (r"/a/update",              PanelUpdateHandler),
     (r"/a/save-animation",      SaveAnimationHandler),
     (r"/a/play-animation",      PlayAnimationHandler),
+    (r"/a/get-all-animations",  GetAllAnimationsHandler),
 ] + SocketIORouter.urls,
     **settings)
 

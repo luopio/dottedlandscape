@@ -44,24 +44,16 @@
 
         <div id="saved-animations">
             <h2> Saved animations </h2>
-            {% for a in saved_animations %}
-            <div animation-title="{{a[0]}}">
-                <span>{{ a[0] }} by <i>{{ a[1] }}</i></span>
+            <div animation-title="" id="saved-animation-blueprint" style="display: none;">
+                <span></span>
                 <table>
                     <thead></thead>
                     <tfoot></tfoot>
                     <tbody>
-                    {% for y in xrange(0, 192, 24) %}
-                    <tr>
-                        {% for x in xrange(0, 24, 3) %}
-                        <td style="background-color: rgb({{a[2][0][x + y]}}, {{a[2][0][x + y + 1]}}, {{a[2][0][x + y + 2]}})"></td>
-                        {% end %}
-                    </tr>
-                    {% end %}
                     </tbody>
                 </table>
             </div>
-            {% end %}
+            <div id="all-animations"></div>
         </div>
 
     </div>

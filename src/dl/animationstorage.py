@@ -10,13 +10,16 @@ class AnimationStorage(object):
 
     def save_animation_to_db(self, key, val):
         json = tornado.escape.json_encode(val)
-        key = self.prefix+key, json
-        self.r.set(key)
+        key = self.prefix+key
+        self.r.set(key, json)
         self.r.sadd(self.directory_key, key)
 
 
     def load_animation_from_db(self, key):
-        return tornado.escape.json_decode(self.r.get(self.prefix+key))
+        print "loading", key
+        val = self.r.get(self.prefix+key)
+        print "got", val
+        return tornado.escape.json_decode(val)
 
 
     def get_all_animations(self):
@@ -25,6 +28,8 @@ class AnimationStorage(object):
         for k in self.r.smembers(self.directory_key):
             j = tornado.escape.json_decode(self.r.get(k))
             middle_frame = j['frames'][len(j['frames']) / 2]
-            anims.append((j['title'], j['author'], middle_frame))
+            anims.append({'title': j['title'],
+                          'author': j['author'],
+                          'frame': middle_frame})
         return anims
 
