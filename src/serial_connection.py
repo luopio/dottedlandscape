@@ -19,9 +19,9 @@ class SerialConnection(object):
 
     def connect(self):
         try:
-            self.ser = serial.Serial('/dev/ttyACM0', 19200)
+            self.ser = serial.Serial('/dev/ttyACM0', 115200)
         except:
-            self.ser = serial.Serial('/dev/ttyACM1', 19200)
+            self.ser = serial.Serial('/dev/ttyACM1', 115200)
 
 
     def write(self, data, checksum):

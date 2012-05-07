@@ -7,7 +7,7 @@ def knight_rider(tbl_width, tbl_height, vars):
     if not vars.has_key('offset'):
         vars['offset'] = int(random.random() * tbl_width)
         vars['speed'] = 1
-        vars['frame_duration'] = 0.05
+        vars['frame_duration'] = 0.10
         vars['total_frames'] = int(30 + 60 * random.random())
         vars['inverted'] = True if random.random() > 0.5 else False
 
@@ -41,18 +41,26 @@ def knight_rider(tbl_width, tbl_height, vars):
 def random_colors(tbl_width, tbl_height, vars):
     if not vars.has_key('total_frames'):
         vars['total_frames'] = int(30 + 20 * random.random())
-    frame = []
+        vars['prev_frame'] = [0] * tbl_width * tbl_height * 3 
+        vars['frame_duration'] = 0.10
+
     if vars['color']:
-        for i in xrange(0, tbl_width * tbl_height):
-            frame += (vars['color'] if random.random() < 0.4 else [0, 0, 0]) # TODO: channels hardcoded here
+        # for i in xrange(0, tbl_width * tbl_height):
+        #     frame += (vars['color'] if random.random() < 0.4 else [0, 0, 0]) # TODO: channels hardcoded here
+        pass
     else:
-        for i in xrange(0, tbl_width * tbl_height * 3): # TODO: channels hardcoded here
-            frame.append( 0 if random.random() < 0.8 else 255 )
+        # for i in xrange(0, tbl_width * tbl_height * 3): # TODO: channels hardcoded here
+        #     frame.append( 0 if random.random() < 0.8 else 255 )
+        for i in xrange(0, random.random() * 3):
+            random_index = int(random.random() * (tbl_width * tbl_height - 1) * 3)
+            vars['prev_frame'][random_index] = 0 if random.random() < 0.3 else 255     
+            vars['prev_frame'][random_index + 1] = 0 if random.random() < 0.3 else 255     
+            vars['prev_frame'][random_index + 2] = 0 if random.random() < 0.3 else 255     
 
     if vars['frame_counter'] > vars['total_frames']:
-        return frame, False, vars
+        return vars['prev_frame'], False, vars
 
-    return frame, True, vars
+    return vars['prev_frame'], True, vars
 
 
 def game_of_life(tbl_width, tbl_height, vars):

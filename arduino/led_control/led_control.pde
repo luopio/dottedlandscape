@@ -19,7 +19,7 @@ byte greenByte = 0;
 
 void setup()
 { 
-  Serial.begin(19200);
+  Serial.begin(115200);
 }
 
 void loop()
@@ -36,7 +36,7 @@ void loop()
         break;
       }
     }
-      
+    
     //redMatrix.clear();
     //blueMatrix.clear();
     //greenMatrix.clear();
@@ -91,8 +91,8 @@ void loop()
     }
     
   }
-  
-  Serial.flush();
-  delay(150);      
+
+  Serial.flush();  
+  delay(50);      
 }
 
