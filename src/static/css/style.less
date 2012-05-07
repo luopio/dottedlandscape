@@ -13,10 +13,9 @@ h1, h2, h3 {
 
 table.panel {
     margin: 12px auto;
-    width: 100%;
-    max-width: 400px;
+    width: 80%;
     td {
-        height: 40px;
+        max-width: 30px;
         text-align: center;
         vertical-align: middle;
         background: #000;
@@ -50,9 +49,9 @@ div#main div#message-sending {
 }
 
 div#saved-animations {
-    margin: 8px 4px;
+    margin: 24px auto;
     text-align: center;
-    max-width: 100%;
+    width: 100%;
     overflow: hidden;
 
     div {
@@ -166,17 +165,32 @@ div.color-selection div.active {
 
 
 /** MEDIA QUERIES */
-@media screen and (min-width: 750px) {
+@media screen and (min-width: 500px) {
     table.panel {
+        width: 80%;
         td {
-            // width: 2cm; /* 12.5% */
-            height: 2cm; /*40px;*/
+            width: 12.5%;
+            //height: 2cm; /*40px;*/
         }
     }
-
-    h2 {
-        text-align: left;
+    div#saved-animations {
+        width: 80%;
     }
+}
+
+/* landscape */
+@media screen and (min-width: 800px) {
+    table.panel {
+        width: 50%;
+        td {
+            // width: 2cm; /* 12.5% */
+            // height: 2cm; /*40px;*/
+        }
+    }
+    //h2 {
+    //    text-align: left;
+    //}
+
     div#main div#color {
         float: right;
         margin: 2em 0;
@@ -191,16 +205,15 @@ div.color-selection div.active {
             margin: 12px 0px;
         }
 
-
-
     }
 
     div#draw {
         div#saved-animations {
+            width: 45%;
             float: right;
             table {
                 td {
-                    width: 20px;
+                    // width: 20px;
                 }
             }
         }
