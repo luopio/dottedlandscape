@@ -144,7 +144,7 @@ def get_random_color():
 
 
 def select_random_visualization():
-    visualization = random.choice([knight_rider, random_colors, game_of_life])
+    visualization = random.choice([knight_rider, random_colors, game_of_life, random_colors, game_of_life])
     print "picked random viz:", visualization.__name__
     vars = {'frame_duration': 0.35, 'frame_counter': 0}
     vars['color'] = get_random_color()
