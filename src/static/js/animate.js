@@ -176,6 +176,7 @@ var animation = {
                 if(data && data.status == 'ok') {
                     $('#animation-author').val('');
                     $('#animation-title').val('');
+                    $('div#add-frame').parent().find('.panel').remove();
                     $('#animation-saved-dialog').dialog('open');
                 }
             }, 
