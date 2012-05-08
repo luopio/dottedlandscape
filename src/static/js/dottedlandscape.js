@@ -39,7 +39,7 @@ var panelInteraction = {
 
     unBindAll: function() {
         $('td').unbind('mouseenter');
-        $('div#animate, div#text, div#draw').unbind('touchmove');
+        $('#animate-panel, #text-panel, #draw-panel').unbind('touchmove');
     },
 
     cellPressedHandler: function(e) {
@@ -61,6 +61,7 @@ var panelInteraction = {
         var elm = $(this).offset();
         var x = touch.clientX - elm.left;
         var y = touch.clientY - elm.top;
+        log('touch at '+x+','+y)
         /*
          var x = touch.pageX - elm.left;
          var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
