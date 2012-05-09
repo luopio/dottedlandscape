@@ -51,7 +51,7 @@ def random_colors(tbl_width, tbl_height, vars):
     else:
         # for i in xrange(0, tbl_width * tbl_height * 3): # TODO: channels hardcoded here
         #     frame.append( 0 if random.random() < 0.8 else 255 )
-        for i in xrange(0, random.random() * 3):
+        for i in xrange(0, int(random.random() * 3)):
             random_index = int(random.random() * (tbl_width * tbl_height - 1) * 3)
             vars['prev_frame'][random_index] = 0 if random.random() < 0.3 else 255     
             vars['prev_frame'][random_index + 1] = 0 if random.random() < 0.3 else 255     
@@ -144,7 +144,7 @@ def get_random_color():
 
 
 def select_random_visualization():
-    visualization = random.choice([knight_rider, random_colors, game_of_life, random_colors, game_of_life])
+    visualization = random.choice([knight_rider, random_colors, game_of_life, random_colors, game_of_life, game_of_life])
     print "picked random viz:", visualization.__name__
     vars = {'frame_duration': 0.35, 'frame_counter': 0}
     vars['color'] = get_random_color()
@@ -155,24 +155,24 @@ def select_random_visualization():
 
 
 if __name__ == '__main__':
+
     dlc = DottedLandscapeCommunicator()
     dlc.connect('127.0.0.1', 2323)
     last_packet_received = 0
     done = False
-    idle_time = 3
+    idle_time = 15
     last_frame = None
-    now = None
+    now = time.time()
     vars = {'frame_duration': 0.5, 'frame_counter': 0} # will be updated by the visualization algorithms
+    visualization, vars = select_random_visualization()
 
     while not done:
         # get any incoming data from the DL server
         headers, payload = dlc.check_for_data()
         if not payload and dlc.panel_width:
 
-            if now == None:
-                visualization, vars = select_random_visualization()
-
             now = time.time()
+
             if now - last_packet_received > idle_time:
                 frame, alive, vars = visualization(dlc.panel_width, dlc.panel_height, vars)
                 last_frame = frame

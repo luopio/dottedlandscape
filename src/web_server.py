@@ -12,15 +12,17 @@ from dl.communicator import DottedLandscapeCommunicator
 from dl.text_writer import TextWriter
 from dl.analytics import Analytics
 from dl.animationstorage import AnimationStorage
+from dl.animationplayer import AnimationPlayer
 
 DL_COMMUNICATOR = DottedLandscapeCommunicator()
 # we define the panel here
 DL_COMMUNICATOR.define_panel(8, 8, 3)
-TEXT_WRITER = TextWriter(8, 8, 3)
 WEB_CLIENTS = []
 SOCKET_IO_CONNECTIONS = []
 ANALYTICS = Analytics()
-ANIMATIONSTORAGE = AnimationStorage()
+ANIMATION_STORAGE = AnimationStorage()
+ANIMATION_PLAYER = AnimationPlayer(DL_COMMUNICATOR)
+
 
 # Helper functions
 def create_user_fingerprint(req):
@@ -128,8 +130,8 @@ class SaveAnimationHandler(tornado.web.RequestHandler):
                                 'title': name, 'author': author,
                                 'frames': frames}
         print "animation save: ", name, author
-        global ANIMATIONSTORAGE
-        ANIMATIONSTORAGE.save_animation_to_db(name, frame_save_structure)
+        global ANIMATION_STORAGE
+        ANIMATION_STORAGE.save_animation_to_db(name, frame_save_structure)
         self.set_header("Content-Type", "application/json")
         json = tornado.escape.json_encode({'status': 'ok', 'name': name})
         self.write(json)
@@ -139,45 +141,18 @@ class PlayAnimationHandler(tornado.web.RequestHandler):
     def get(self):
         args = self.request.arguments
         name = args['title'][0]
-        global ANIMATIONSTORAGE
-        a = ANIMATIONSTORAGE.load_animation_from_db(name)
+        global ANIMATION_STORAGE
+        a = ANIMATION_STORAGE.load_animation_from_db(name)
         if a:
-            pt = PlayAnimationThread(a['frames'])
-            pt.start()
+            ANIMATION_PLAYER.play(a['frames'])
 
 
 class GetAllAnimationsHandler(tornado.web.RequestHandler):
         def get(self):
-            global ANIMATIONSTORAGE
-            a = ANIMATIONSTORAGE.get_all_animations()
-            print "got anims", a
+            global ANIMATION_STORAGE
+            a = ANIMATION_STORAGE.get_all_animations()
             json = tornado.escape.json_encode(a)
             self.write(json)
-            print "wrote json", json
-
-
-class PlayAnimationThread(threading.Thread):
-    def __init__(self, frames=None, message=None, color=None):
-        self.frames = frames
-        self.message = message
-        self.color = color
-        super(PlayAnimationThread, self).__init__()
-
-    def run(self):
-        if self.frames:
-            print "PlayAnimationThread: playing animation with %s frames." % len(self.frames)
-            for frame in self.frames:
-                p = DL_COMMUNICATOR.encode_full_frame(frame[0])
-                DL_COMMUNICATOR.send(p)
-                time.sleep(float(frame[1]))
-        else:
-            print "PlayAnimationThread: playing a message %s" % self.message
-            for frame in TEXT_WRITER.get_all_frames(self.message, self.color):
-                p = DL_COMMUNICATOR.encode_full_frame(frame[0])
-                DL_COMMUNICATOR.send(p)
-                time.sleep(float(frame[1]))
-
-        print "PlayAnimationThread: animation done."
 
 
 class SocketIOUpdaterConnection(SocketConnection):
@@ -197,10 +172,7 @@ class SocketIOUpdaterConnection(SocketConnection):
         print "MESSAGE COLOR:", c
         # user_data = create_user_fingerprint(self.request)
         # ANALYTICS.text_messaged({'msg': message, 'color': c}, user_data)
-
-        print "PLAY MESSAGE", message
-        pt = PlayAnimationThread(message=message, color=c)
-        pt.start()
+        ANIMATION_PLAYER.text(message=message, color=c)
 
 
     def on_open(self, msg):
@@ -246,7 +218,7 @@ if __name__ == "__main__":
         print "trying to connect via port 80"
         application.listen(80)
     except:
-	print "... failed. Backing up to 8888"
+        print "... failed. Backing up to 8888"
         application.listen(8888)
     
     # http_server = tornado.httpserver.HTTPServer(application)

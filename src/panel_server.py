@@ -1,4 +1,4 @@
-import  sys
+import sys
 import gevent
 from gevent import socket
 
@@ -44,10 +44,12 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
         self.__panel_data = [0 for _ in xrange(self.panel_width * self.panel_height * self.channels)]
         self.__fade_out_counters = [0 for _ in xrange(self.panel_width * self.panel_height)]
 
-    
+
     def plot_partial(self, data):
         x, y, r, g, b = data
-        self.__fade_out_counters[x + y * self.panel_width] = 15
+        self.__fade_out_counters[x + y * self.panel_width] = 40
+        # also increase all the others.. make the whole picture live longer
+        self.__fade_out_counters = map(lambda x: (x > 100 and x + 5) or (x > 0 and x + 25) or 0, self.__fade_out_counters)
         self.plot(x, y, (r, g, b))
         
 
@@ -60,7 +62,7 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
             self.__panel_data[i + 1] = data[i + 1]
             self.__panel_data[i + 2] = data[i + 2]
             if data[i] + data[i + 1] + data[i + 2] > 0:
-                self.__fade_out_counters[int(i / 3)] = 15
+                self.__fade_out_counters[int(i / 3)] = 30
             i += 3
         self.__panel_changed = True
     
@@ -156,20 +158,26 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
     
     
     def panel_fadeout(self):
+        ''' Runs on its own and fades out the panel. '''
         while self.keep_on_doing_it:
             i = 0
             at_least_one_has_gone_dark = False
             if self.__fade_out_counters and sum(self.__fade_out_counters):
+
                 for i, v in enumerate(self.__fade_out_counters):
                     if self.__fade_out_counters[i] > 0:
                         self.__fade_out_counters[i] -= 1
-                        if self.__fade_out_counters[i] == 0:
+
+                        if self.__fade_out_counters[i] <= 0:
+                            self.__fade_out_counters[i] = 0
                             self.__panel_data[i * 3 + 0] = 0
                             self.__panel_data[i * 3 + 1] = 0
                             self.__panel_data[i * 3 + 2] = 0
                             at_least_one_has_gone_dark = True
+
                 if at_least_one_has_gone_dark:
                     self.notify_receivers()
+
             gevent.sleep(0.1)
     
     
@@ -204,7 +212,7 @@ class DottedLandscapeServer(DottedLandscapeCommunicator):
 
 
 if __name__ == '__main__':
-    dls = DottedLandscapeServer(fade_out=True, additive_coloring=True)
+    dls = DottedLandscapeServer(fade_out=True, additive_coloring=False)
     dls.start()
     # dls.send_test_packet('127.0.0.1', 2324)
     

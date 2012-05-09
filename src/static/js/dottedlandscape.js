@@ -14,9 +14,10 @@ var panelInteraction = {
     isInitialized: false,
 
     bind: function(element, justLocal, changeCallback) {
-        log('panelInteraction: init')
+        log('panelInteraction: init');
 
         if(!panelInteraction.isInitialized) {
+            log('panelInteraction: first bind run');
             $('body').mousedown(panelInteraction.cellPressStartedHandler);
             $('body').bind('touchstart', panelInteraction.cellPressStartedHandler);
             $('body').mouseup(function(e) {
@@ -28,9 +29,9 @@ var panelInteraction = {
         }
         if(element !== null) {
             var $el = $(element);
-            $el.find('td').mouseenter(panelInteraction.cellPressedHandler);
             panelInteraction.panelWidth = $el.width();
             panelInteraction.panelHeight = $el.height();
+            $el.find('td').bind('mouseenter', panelInteraction.cellPressedHandler);
             $el.bind('touchmove', panelInteraction.touchMoveHandler);
         }
         panelInteraction.changeCallback = changeCallback;
@@ -59,35 +60,18 @@ var panelInteraction = {
         if(e.preventDefault) { e.preventDefault(); }
         var touch = e.originalEvent.touches.item(0);
         var elm = $(this).offset();
-        var x = touch.clientX - elm.left;
-        var y = touch.clientY - elm.top;
-        /*
-         var x = touch.pageX - elm.left;
-         var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-         var y = touch.pageY - elm.top;
-         */
-        // $('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight)
+
+        var x = touch.pageX - elm.left;
+        var y = touch.pageY - elm.top;
+
         if(x < panelInteraction.panelWidth && x > 0) {
             if(y < panelInteraction.panelHeight && y > 0) {
                 var row = Math.floor(y / panelInteraction.panelHeight * 8);
                 var col = Math.floor(x / panelInteraction.panelWidth * 8);
-                //$('footer').text(x + ", " + y + " panel=" + panelWidth+", "+panelHeight +
-                //    "col, row="+col+", "+ row +" mousedown? "+panelInteraction.mouseButtonDown);
-                /*
-                 var cellWidth = panelWidth / 8;
-                 var cellHeight = panelHeight / 8;
-                 var cellLeftEdgeDelta = x - col * cellWidth;
-                 var cellTopEdgeDelta = y - row * cellHeight;
-                 */
-                // alert('deltas: ' + cellLeftEdgeDelta + ", " + cellTopEdgeDelta+' w/h ' + cellWidth + ", " + cellHeight);
-                //if (cellLeftEdgeDelta > cellWidth * 0.1 && cellLeftEdgeDelta < cellWidth * 0.9) {
-                //    if (cellTopEdgeDelta > cellHeight * 0.1 && cellTopEdgeDelta < cellHeight * 0.9) {
                 panelInteraction.cellPressedAt(col, row, $(this));
-                //    }
-                //}
-
             }
         }
+        return false;
     },
 
     rgbRegexp: /rgb\(([0-9]+), ?([0-9]+), ?([0-9]+)\)/,
