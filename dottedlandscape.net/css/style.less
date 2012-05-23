@@ -38,17 +38,30 @@ body {
     padding: 0 8px;
 }
 
-hgroup {
-    font-family: HeroRegular;
-    .content-area;
-    h1 {
-        font-weight: normal;
+header {
+    hgroup {
+        font-family: HeroRegular;
+        .content-area;
+        h1 {
+            font-weight: normal;
+        }
     }
 }
 
 a {
     text-decoration: none;
     color: #BC13CE;
+}
+
+section#main-content {
+    text-align: center;
+    iframe {
+        width: 100%;
+        max-width: 700px;
+        margin: 24px auto;
+        min-height: 800px;
+        border: 0;
+    }
 }
 
 /* ==|== media queries ======================================================
