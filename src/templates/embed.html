@@ -30,7 +30,7 @@
     <script src="{{ static_url('js/libs/modernizr-1.7.min.js') }}"></script>
 </head>
 
-<body id="{% block body_id %}{% end %}" style="background: #000009;">
+<body id="{% block body_id %}{% end %}" style="background: #090919;">
 
 <div id="draw">
 
@@ -59,29 +59,6 @@
             {% end %}
             </tbody>
         </table>
-
-<!--         <div id="saved-animations">
-            <h2> Saved animations </h2>
-            {% for a in saved_animations %}
-            <div animation-title="{{a[0]}}">
-                <span>{{ a[0] }} by <i>{{ a[1] }}</i></span>
-                <table>
-                    <thead></thead>
-                    <tfoot></tfoot>
-                    <tbody>
-                    {% for y in xrange(0, 192, 24) %}
-                    <tr>
-                        {% for x in xrange(0, 24, 3) %}
-                        <td style="background-color: rgb({{a[2][0][x + y]}}, {{a[2][0][x + y + 1]}}, {{a[2][0][x + y + 2]}})"></td>
-                        {% end %}
-                    </tr>
-                    {% end %}
-                    </tbody>
-                </table>
-            </div>
-            {% end %}
-        </div>
--->
     </div>
 </div>
 
@@ -107,14 +84,6 @@
         panelInteraction.unBindAll();
         panelInteraction.bind("#draw-panel");
         socketIOPanelUpdater.bind("#draw-panel");
-
-        // Events for the live drawing view
-        $('#saved-animations div').bind("click touchstart",
-                function(e) {
-                    e.preventDefault();
-                    var t = $(this).attr('animation-title');
-                    panelInteraction.playAnimation(t);
-                });
     });
 </script>
 
