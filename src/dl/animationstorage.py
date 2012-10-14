@@ -24,6 +24,10 @@ class AnimationStorage(object):
             val['time'] = time.time()
             print "outdated animation value for", key, "updating"
             self.save_animation_to_db(key, val)
+        else:
+            val['play_count'] += 1
+            self.save_animation_to_db(key, val)
+
         return val
 
 
