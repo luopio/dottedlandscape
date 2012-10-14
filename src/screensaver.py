@@ -68,7 +68,7 @@ def game_of_life(tbl_width, tbl_height, vars):
         print "shuffle table"
         tbl = [0] * dlc.panel_width * dlc.panel_height
         for i, e in enumerate(tbl):
-            if random.random() < 0.3: tbl[i] = 1
+            if random.random() < 0.34: tbl[i] = 1
         vars['table'] = tbl
         vars['frame_duration'] = 0.3
 
