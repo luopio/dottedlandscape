@@ -1,4 +1,4 @@
-import tornado, redis
+import tornado, redis, time
 
 class AnimationStorage(object):
     prefix = 'dl_2_'
@@ -18,8 +18,13 @@ class AnimationStorage(object):
     def load_animation_from_db(self, key):
         print "loading", key
         val = self.r.get(self.prefix+key)
-        print "got", val
-        return tornado.escape.json_decode(val)
+        val = tornado.escape.json_decode(val)
+        if not val.has_key('play_count'):
+            val['play_count'] = 0
+            val['time'] = time.time()
+            print "outdated animation value for", key, "updating"
+            self.save_animation_to_db(key, val)
+        return val
 
 
     def get_all_animations(self):
@@ -30,6 +35,8 @@ class AnimationStorage(object):
             middle_frame = j['frames'][len(j['frames']) / 2]
             anims.append({'title': j['title'],
                           'author': j['author'],
+                          'time': j['time'],
+                          'play_count': j['play_count'],
                           'frame': middle_frame})
         return anims
 

@@ -126,8 +126,11 @@ class SaveAnimationHandler(tornado.web.RequestHandler):
             counter += 1
         
         frame_save_structure = {'channels': channels, 
-                                'title': name, 'author': author,
-                                'frames': frames}
+                                'title': name,
+                                'author': author,
+                                'frames': frames,
+                                'time': time.time(),
+                                'play_count': 0}
         print "animation save: ", name, author
         global ANIMATION_STORAGE
         ANIMATION_STORAGE.save_animation_to_db(name, frame_save_structure)
