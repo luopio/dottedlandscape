@@ -49,7 +49,7 @@ class PlayAnimationThread(threading.Thread):
                 self.dlc.send(p)
                 time.sleep(float(frame[1]))
         else:
-            print "PlayAnimationThread: playing a message %s" % self.message
+            print "PlayAnimationThread: playing a message of length %s" % len(self.message)
             for frame in TEXT_WRITER.get_all_frames(self.message, self.color):
                 p = self.dlc.encode_full_frame(frame[0])
                 self.dlc.send(p)
