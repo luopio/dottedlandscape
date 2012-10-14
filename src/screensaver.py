@@ -28,9 +28,13 @@ def knight_rider(tbl_width, tbl_height, vars):
     if vars['offset'] > tbl_width - 1:
         vars['speed'] = -1
         vars['offset'] = tbl_width - 1
+        # change colors on bounce
+        vars['color'] = get_random_color()
     elif vars['offset'] < 0:
         vars['speed'] = 1
         vars['offset'] = 0
+        # change colors on bounce
+        vars['color'] = get_random_color()
 
     if vars['frame_counter'] > vars['total_frames']:
         return frame, False, vars
