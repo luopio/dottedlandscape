@@ -1,6 +1,31 @@
 import random
 import time
 from dl.communicator import DottedLandscapeCommunicator
+from dl.text_writer import TextWriter
+
+# singleton for message writing
+TEXT_WRITER = None
+
+def message(tbl_width, tbl_height, vars):
+    global TEXT_WRITER
+    if not TEXT_WRITER:
+        TEXT_WRITER = TextWriter(tbl_width, tbl_height)
+        msgs = ['Cartes Flux 2012', 'DottedLandscape.net', 'Reclaim your public space']
+        msg = random.choice(msgs)
+        vars['frames'] = TEXT_WRITER.get_all_frames(msg, vars['color'])
+        vars['current_index'] = 0
+        vars['frame_duration'] = 0.05
+        print "play message", msg
+
+    try:
+        vars['cur_frame'] = vars['frames'].next()[0]
+    except StopIteration:
+        del(TEXT_WRITER)
+        TEXT_WRITER = None
+        return vars['cur_frame'], False, vars
+
+    return vars['cur_frame'], True, vars
+
 
 
 def knight_rider(tbl_width, tbl_height, vars):
@@ -79,7 +104,7 @@ def game_of_life(tbl_width, tbl_height, vars):
     new_tbl = [0] * tbl_width * tbl_height
     alive = False
     for i, e in enumerate(vars['table']):
-        nn = number_of_neighbours(i, vars['table'], tbl_width, tbl_height)
+        nn = _gof_number_of_neighbours(i, vars['table'], tbl_width, tbl_height)
         new_tbl[i] = e
         if e == 1:
             if nn > 3 or nn < 2:
@@ -101,7 +126,7 @@ def game_of_life(tbl_width, tbl_height, vars):
     return frame, alive, vars
 
 
-def number_of_neighbours(i, tbl, tbl_width, tbl_height):
+def _gof_number_of_neighbours(i, tbl, tbl_width, tbl_height):
     x = i % tbl_width
     y = i / tbl_width
     nn = 0
@@ -148,7 +173,9 @@ def get_random_color():
 
 
 def select_random_visualization():
-    visualization = random.choice([knight_rider, random_colors, game_of_life, random_colors, game_of_life, game_of_life])
+    visualization = random.choice([knight_rider, random_colors, game_of_life,
+                                   random_colors, game_of_life, game_of_life,
+                                   message, message])
     print "picked random viz:", visualization.__name__
     vars = {'frame_duration': 0.35, 'frame_counter': 0}
     vars['color'] = get_random_color()
@@ -173,6 +200,8 @@ if __name__ == '__main__':
     while not done:
         # get any incoming data from the DL server
         headers, payload = dlc.check_for_data()
+
+        # panel is up, but there is nothing happening
         if not payload and dlc.panel_width:
 
             now = time.time()
@@ -183,9 +212,11 @@ if __name__ == '__main__':
                 dlc.send(dlc.encode_full_frame(frame))
                 vars['frame_counter'] += 1
 
+                # new random visualization
                 if not alive:
                     visualization, vars = select_random_visualization()
 
+        # it seems the panel is playing something
         elif payload:
             s = sum(payload)
             if last_frame:

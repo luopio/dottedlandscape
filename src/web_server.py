@@ -9,7 +9,6 @@ import redis
 from tornadio2 import SocketConnection, TornadioRouter, event
 
 from dl.communicator import DottedLandscapeCommunicator
-from dl.text_writer import TextWriter
 from dl.analytics import Analytics
 from dl.animationstorage import AnimationStorage
 from dl.animationplayer import AnimationPlayer

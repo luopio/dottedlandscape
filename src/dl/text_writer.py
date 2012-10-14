@@ -2,7 +2,7 @@ import alphabet
 
 class TextWriter(object):
 
-    def __init__(self, w, h, c):
+    def __init__(self, w, h, c=3):
         self.panel_width = w
         self.panel_height = h
         self.channels = c
