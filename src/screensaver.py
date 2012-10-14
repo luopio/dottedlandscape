@@ -14,7 +14,7 @@ def message(tbl_width, tbl_height, vars):
         msg = random.choice(msgs)
         vars['frames'] = TEXT_WRITER.get_all_frames(msg, vars['color'])
         vars['current_index'] = 0
-        vars['frame_duration'] = 0.05
+        vars['frame_duration'] = 0.08
         print "play message", msg
 
     try:
